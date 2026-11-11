@@ -33,3 +33,13 @@ POINTS AND FEEDBACK
 DAILY GAVEL PAPER (END OF DAY)
 - Add an option to go back to the starting menu.
 - Cut the amount of text on it.
+
+11/11/2026 Team meet Up Notes  
+- If you accept too many envelopes you have to face consequences
+- You yourself go on trial and its not a regular gameplay its like stuff you have to do
+- You accept the envelope and goes against the envelope you can have that option and you make an actual enemy and they will definitely come back
+- Trash the place and you have to pay a lot to replace it.
+- To upgrade your position you have to have a certain number of points and you can use those points to apply for a higher position and your points are deducted but your position is higher. 
+- Suggestion on POV Type like if they can zoom in or zoom out. 
+
+
