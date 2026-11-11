@@ -1,0 +1,1264 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Order in the Court</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Lexend:wght@400;500;600&family=JetBrains+Mono:wght@500;700&family=Caveat:wght@600&display=swap">
+<style>
+/* Layout: one full-screen courtroom, no page scroll. A small top bar sits inside the frame, the judge's desk runs along the
+   bottom with real objects on it (gavel, law book, case file), and everything else floats over the scene as plain words.
+   Single dark look on purpose (a game screen); every color is set explicitly. */
+:root{
+  --ink:#07090c; --panel:#141b24; --panel2:#1d2631; --line:#344255;
+  --text:#f1ebdd; --muted:#a7afb9; --paper:#f2e8d0; --paper-ink:#2b2217;
+  --brass:#d4a84a; --brass-ink:#2a1d07; --crime:#b9382e; --clear:#2f5f96; --good:#62b06f; --warn:#e0a83c;
+  --f-display:"Cinzel", "Trajan Pro", Georgia, serif;
+  --f-body:"Lexend", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:"JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  --f-hand:"Caveat", "Segoe Print", "Comic Sans MS", cursive;
+  --u: min(1vw, 1.75vh);
+  color-scheme:dark;
+}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--ink);color:var(--text)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.45}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+h1,h2,h3{font-family:var(--f-display);font-weight:700;text-wrap:balance;margin:0}
+button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;padding:0}
+button:focus-visible,input:focus-visible{outline:2px solid var(--brass);outline-offset:3px}
+.shadowtext{text-shadow:0 2px 6px rgba(0,0,0,.85),0 0 2px rgba(0,0,0,.9)}
+
+/* ---------- Court ---------- */
+.game{position:fixed;inset:0}
+.court{position:absolute;inset:0;overflow:hidden;
+  --c-wall:#454c49;--c-wall2:#3a403e;--c-floor1:#5a5850;--c-floor2:#3f3d37;--c-wood:#5d4b3a;--c-wood2:#4a3b2d;--c-trim:#6c6a5e;
+  --c-desk1:#8a6a4a;--c-desk2:#5b4330;--c-desk3:#3b2b1f}
+.court.r1{--c-wall:#6a3e25;--c-wall2:#58321d;--c-floor1:#6f6355;--c-floor2:#4c4238;--c-wood:#7d4828;--c-wood2:#63391f;--c-trim:#a8743f;--c-desk1:#9a5a30;--c-desk2:#6e3c1c;--c-desk3:#46240f}
+.court.r2{--c-wall:#9097a0;--c-wall2:#7f868f;--c-floor1:#b9bdc2;--c-floor2:#8d9299;--c-wood:#4d5259;--c-wood2:#3d4147;--c-trim:#d8dbe0;--c-desk1:#e8e5df;--c-desk2:#c9c4ba;--c-desk3:#9e988c}
+.court.r3{--c-wall:#2f3d57;--c-wall2:#263249;--c-floor1:#8e959f;--c-floor2:#646b75;--c-wood:#3d4456;--c-wood2:#2f3545;--c-trim:#cf9f45;--c-desk1:#e8e5df;--c-desk2:#c9c4ba;--c-desk3:#9e988c}
+.court.r4{--c-wall:#cfc9bb;--c-wall2:#bdb6a6;--c-floor1:#e3ddd0;--c-floor2:#b9b2a3;--c-wood:#6e5841;--c-wood2:#574532;--c-trim:#cf9f45;--c-desk1:#f1eee8;--c-desk2:#d6d0c4;--c-desk3:#a9a294}
+.court.shake{animation:shake .25s}
+@keyframes shake{25%{transform:translateY(3px)}60%{transform:translateY(-2px)}}
+.wall{position:absolute;inset:0 0 40% 0;background:repeating-linear-gradient(90deg,var(--c-wall) 0 10.6%,var(--c-wall2) 10.6% 11%)}
+.floor{position:absolute;inset:60% 0 0 0;background:linear-gradient(var(--c-floor1),var(--c-floor2))}
+.trim{position:absolute;left:0;right:0;top:60%;height:1.2%;background:var(--c-trim)}
+.lamp{position:absolute;left:50%;top:0;width:36%;height:46%;transform:translateX(-50%);background:radial-gradient(ellipse at top,rgba(255,240,200,.2),transparent 70%);pointer-events:none}
+.court.r0 .lamp{animation:flicker 6s infinite}
+@keyframes flicker{0%,47%,100%{opacity:1}48%{opacity:.2}49%{opacity:.9}50%{opacity:.3}52%{opacity:1}}
+.flag{position:absolute;top:18%;width:2.6%;height:15%;background:linear-gradient(#b23a32 0 14%,#eee 14% 28%,#b23a32 28% 42%,#eee 42% 56%,#b23a32 56% 70%,#eee 70% 84%,#b23a32 84%)}
+.flag::before{content:"";position:absolute;left:0;top:0;width:45%;height:50%;background:#2c4a7a}
+.flag.l{left:40%}.flag.r{right:40%}
+.court.r0 .flag.r{display:none}
+.clock{position:absolute;left:50%;top:16%;width:min(10vw,17vh);aspect-ratio:1;transform:translateX(-50%);filter:drop-shadow(0 4px 8px rgba(0,0,0,.45));z-index:1}
+.clock .sec{transition:transform .18s cubic-bezier(.3,1.6,.6,1)}
+.gallery{position:absolute;bottom:38%;width:17%;height:30%}
+.gallery.l{left:0}.gallery.r{right:0}
+.gallery svg{width:100%;height:100%}
+.stand{position:absolute;left:50%;bottom:24%;width:18%;height:15%;transform:translateX(-50%);background:linear-gradient(var(--c-wood),var(--c-wood2));border-top:4px solid var(--c-trim);border-radius:3px;z-index:3}
+.table{position:absolute;bottom:17%;width:28%;height:9%;background:linear-gradient(var(--c-wood),var(--c-wood2));border-top:5px solid var(--c-trim);border-radius:3px;z-index:6}
+.table.l{left:6%}.table.r{right:6%}
+.fig{position:absolute;height:56%;bottom:16%;z-index:5;transition:opacity .4s}
+.fig svg{height:100%;width:auto;display:block}
+.fig.p{left:13%}.fig.d{right:13%}
+.fig.w{left:50%;bottom:27%;height:37%;transform:translateX(-50%);z-index:2}
+.fig.b{left:30%;bottom:26%;height:40%;z-index:2}
+.fig.talk{animation:bob .5s ease-in-out infinite alternate}
+.fig.w.talk{animation:bobw .5s ease-in-out infinite alternate}
+@keyframes bob{to{transform:translateY(-1.5%)}}
+@keyframes bobw{from{transform:translateX(-50%)}to{transform:translateX(-50%) translateY(-1.5%)}}
+.tag{position:absolute;bottom:22.5%;z-index:11;font-size:clamp(10px,calc(var(--u)*1.15),15px);font-weight:500;color:var(--text);letter-spacing:.02em}
+.tag.l{left:7%}.tag.r{right:7%;text-align:right}
+.tag b{display:block;font-size:.78em;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);font-weight:600}
+
+/* ---------- Top bar ---------- */
+.hud{position:absolute;top:max(8px,env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);z-index:20;display:flex;gap:clamp(10px,2vw,22px);align-items:center;
+  background:rgba(8,11,16,.62);backdrop-filter:blur(4px);border-radius:999px;padding:4px 16px;font-size:clamp(11px,calc(var(--u)*1.05),14px);white-space:nowrap}
+.hud .k{font-size:.78em;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-right:6px}
+.hud .v{font-family:var(--f-mono);font-weight:700;font-variant-numeric:tabular-nums}
+.hud .timer.red{color:#ff8a7e}
+.hud .v.bump{color:var(--good)}
+.hud .rep{display:inline-flex;align-items:center;gap:6px}
+.hud .bar{width:clamp(36px,5vw,70px);height:6px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden}
+.hud .bar i{display:block;height:100%;background:var(--good);transition:width .4s}
+.menubtn{position:absolute;top:max(8px,env(safe-area-inset-top,0px));right:max(10px,env(safe-area-inset-right,0px));z-index:20;width:34px;height:34px;border-radius:50%;background:rgba(8,11,16,.62);display:flex;align-items:center;justify-content:center}
+.menubtn svg{width:18px;height:18px}
+
+/* ---------- Floating words ---------- */
+.plate{position:absolute;left:50%;top:35%;transform:translateX(-50%);z-index:12;text-align:center;width:min(80%,900px);pointer-events:none}
+.plate h2{font-size:clamp(26px,calc(var(--u)*4.4),64px);color:var(--paper);letter-spacing:.03em;line-height:1.05}
+.plate p{margin:6px 0 0;font-size:clamp(13px,calc(var(--u)*1.6),22px);color:#e9dfc8}
+.plate.in{animation:platein .7s ease-out}
+@keyframes platein{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translate(-50%,0)}}
+.prompt{position:absolute;left:50%;bottom:calc(21% + 64px);transform:translateX(-50%);z-index:15;text-align:center;font-size:clamp(12px,calc(var(--u)*1.3),17px);width:min(90%,720px);pointer-events:none}
+.prompt .warn{color:#ffb0a6}
+.bubble{position:absolute;top:calc(max(8px,env(safe-area-inset-top,0px)) + 40px + max(9%,64px));z-index:14;max-width:34%;transform:translateX(-50%);background:#fffdf7;color:#1c1813;border-radius:14px;padding:9px 13px;font-size:clamp(12px,calc(var(--u)*1.35),18px);line-height:1.35;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.bubble::after{content:"";position:absolute;left:50%;bottom:-9px;width:18px;height:18px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:3px}
+.bubble b{display:block;font-size:.7em;letter-spacing:.09em;text-transform:uppercase;color:#7a6338}
+.bubble.can{cursor:pointer}
+.bubble .flaghint{display:block;margin-top:5px;font-size:.68em;color:#8a7a5c}
+.bubble.flagged{background:#ffe7e3;outline:3px solid var(--crime)}
+.bubble.flagged .flaghint{color:var(--crime);font-weight:600}
+.topcards{position:absolute;top:calc(max(8px,env(safe-area-inset-top,0px)) + 40px);left:50%;transform:translateX(-50%);z-index:15;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;width:min(96%,1180px)}
+.card{flex:0 1 180px;min-width:0;text-align:left;background:linear-gradient(#f6edd6,#e9dcbd);color:var(--paper-ink);border-radius:8px;padding:7px 11px;font-size:clamp(11px,calc(var(--u)*1.1),14px);line-height:1.3;box-shadow:0 3px 0 #b39b6b,0 6px 14px rgba(0,0,0,.35);transition:transform .12s}
+.card small{display:block;font-size:.74em;letter-spacing:.08em;text-transform:uppercase;color:#7a6338;font-weight:600}
+.card.alt{background:linear-gradient(#dfe7f1,#c7d3e2);box-shadow:0 3px 0 #8396ae,0 6px 14px rgba(0,0,0,.35)}
+.card:hover:not(:disabled){transform:translateY(-2px)}
+.card:disabled{opacity:.42;cursor:not-allowed;box-shadow:none}
+@media (max-height:520px){.topcards{gap:5px;top:calc(max(6px,env(safe-area-inset-top,0px)) + 32px)}.card{flex-basis:124px;padding:4px 8px;font-size:11px;line-height:1.2}.card small{font-size:8.5px}.hud{padding:3px 12px}.coach{font-size:12.5px;max-width:260px}}
+
+/* ---------- Desk ---------- */
+.desk{position:absolute;left:0;right:0;bottom:0;height:21%;z-index:10;
+  background:linear-gradient(var(--c-desk1) 0,var(--c-desk2) 14%,var(--c-desk3) 100%);box-shadow:0 -6px 18px rgba(0,0,0,.45)}
+.desk::before{content:"";position:absolute;left:0;right:0;top:0;height:9%;background:linear-gradient(rgba(255,255,255,.35),rgba(255,255,255,0))}
+.desk::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(100deg,rgba(255,255,255,.035) 0 3px,transparent 3px 22px);pointer-events:none}
+.deskitem{position:absolute;bottom:10%;z-index:2;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .15s;filter:drop-shadow(0 6px 6px rgba(0,0,0,.45))}
+.deskitem:hover{transform:translateY(-4px) rotate(-1deg)}
+.deskitem span{font-size:clamp(9px,calc(var(--u)*.95),13px);font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#fff3d6}
+.deskitem svg{display:block;width:100%;height:auto}
+.gavel{left:1.5%;width:min(17vw,26vh);bottom:4%}
+.book{left:calc(1.5% + min(17vw,26vh) + 1.5%);width:min(10vw,15vh)}
+.file{right:calc(2% + min(10vw,16vh) + 1.5%);width:min(10vw,15vh)}
+.gavel #gArm{transform-box:view-box;transform-origin:20px 72px}
+.gavel.bang #gArm{animation:gbang .42s ease-in}
+@keyframes gbang{0%{transform:rotate(0)}40%{transform:rotate(-30deg)}75%{transform:rotate(3deg)}100%{transform:rotate(0)}}
+.glow{animation:glow 1.2s ease-in-out infinite}
+@keyframes glow{50%{filter:drop-shadow(0 0 14px #ffd86b) drop-shadow(0 0 4px #ffd86b)}}
+.deskactions{position:absolute;left:50%;bottom:18%;transform:translateX(-50%);z-index:3;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;width:min(46%,560px)}
+.rule{font-family:var(--f-display);font-weight:700;letter-spacing:.06em;font-size:clamp(15px,calc(var(--u)*2),28px);padding:.45em 1.3em;border-radius:10px;color:#fff;box-shadow:inset 0 2px 0 rgba(255,255,255,.25),0 4px 0 rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.35)}
+.rule.crime{background:linear-gradient(#3c6aa6,#2a4c7c);border:2px solid #9fb8d8}
+.rule.clear{background:linear-gradient(#b84a3c,#8c2f25);border:2px solid #e2a79e}
+.rule:disabled{opacity:.35;cursor:not-allowed}
+.dbtn{font-weight:600;font-size:clamp(13px,calc(var(--u)*1.35),18px);padding:.5em 1.2em;border-radius:9px;background:var(--brass);color:var(--brass-ink);box-shadow:0 3px 0 #8d6a24,0 6px 12px rgba(0,0,0,.35)}
+.dbtn.ghost{background:rgba(10,14,20,.55);color:var(--text);box-shadow:none;border:1px solid rgba(255,255,255,.25)}
+.envfly{position:absolute;right:2%;bottom:5%;width:min(10vw,16vh);z-index:16;filter:drop-shadow(0 8px 10px rgba(0,0,0,.5))}
+.envfly.land{animation:flyin 1.1s cubic-bezier(.2,.8,.3,1) both, glow 1.2s 1.1s ease-in-out infinite}
+@keyframes flyin{from{transform:translate(-55vw,-75vh) rotate(-260deg) scale(.5);opacity:.2}to{transform:translate(0,0) rotate(-8deg) scale(1);opacity:1}}
+.envfly svg{width:100%;height:auto;display:block}
+
+/* ---------- Coach (orientation day) ---------- */
+.coach{position:absolute;z-index:35;max-width:min(320px,80vw);background:#fff6df;color:#2b2217;border-radius:12px;padding:10px 14px;font-size:14px;line-height:1.4;box-shadow:0 10px 26px rgba(0,0,0,.45)}
+.coach b{display:block;font-family:var(--f-display);font-size:12px;letter-spacing:.08em;color:#8a5d14}
+.coach::after{content:"";position:absolute;left:var(--ax,50%);width:14px;height:14px;background:inherit;transform:translateX(-50%) rotate(45deg)}
+.coach.down::after{bottom:-7px}.coach.up::after{top:-7px}
+
+/* ---------- Pop-ups ---------- */
+.pops{position:absolute;inset:0;z-index:30;pointer-events:none}
+.pop{position:absolute;left:50%;top:40%;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-display);font-weight:700;font-size:clamp(18px,calc(var(--u)*2.6),38px);animation:rise 1.7s ease-out forwards}
+.pop small{font-family:var(--f-body);font-weight:500;font-size:.5em;margin-left:10px;color:#fff}
+.pop.plus{color:#8ff0a0}.pop.minus{color:#ff8a7e}.pop.cash{color:#ffd86b}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,16px) scale(.8)}15%{opacity:1;transform:translate(-50%,0) scale(1.08)}25%{transform:translate(-50%,0) scale(1)}100%{opacity:0;transform:translate(-50%,-90px)}}
+.bigmoney{position:absolute;left:50%;top:34%;transform:translateX(-50%);text-align:center;z-index:31;pointer-events:none;animation:money 2.6s ease-out forwards}
+.bigmoney b{display:block;font-family:var(--f-display);font-weight:900;font-size:clamp(48px,calc(var(--u)*9),130px);color:#ffd86b;line-height:1;text-shadow:0 0 30px rgba(255,200,80,.6),0 6px 12px rgba(0,0,0,.7)}
+.bigmoney span{font-size:clamp(14px,calc(var(--u)*1.6),22px);color:#fff}
+@keyframes money{0%{opacity:0;transform:translateX(-50%) scale(.3)}18%{opacity:1;transform:translateX(-50%) scale(1.15)}30%{transform:translateX(-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-40px)}}
+@media (prefers-reduced-motion:reduce){.fig.talk,.fig.w.talk,.court.r0 .lamp,.glow,.envfly.land{animation:none}.pop,.bigmoney{animation-duration:2.4s}}
+
+/* ---------- Overlays ---------- */
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(4,6,9,.72);display:flex;align-items:center;justify-content:center;padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.sheet{width:min(680px,100%);max-height:100%;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.sheet.plain{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px}
+.sheet h2{font-size:26px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--panel2);border-radius:9px;padding:9px 14px;font-weight:500}
+.btn:hover:not(:disabled){border-color:var(--brass)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.brass{background:var(--brass);color:var(--brass-ink);border-color:var(--brass);font-weight:600}
+.btn.ghost{background:transparent}
+.note{font-size:13px;color:var(--muted);margin:0}
+.lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.val{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-weight:700}
+
+/* Case file folder */
+.folder{position:relative;padding-top:34px}
+.ftabs{position:absolute;top:0;left:14px;right:14px;display:flex;gap:4px;overflow-x:auto}
+.ftabs button{flex:0 0 auto;background:#c9a764;color:#3a2a12;border-radius:8px 8px 0 0;padding:7px 12px 10px;font-size:13px;font-weight:600}
+.ftabs button[aria-selected="true"]{background:#e5c88a;transform:translateY(2px)}
+.fbody{background:linear-gradient(#e5c88a,#d9b874);border-radius:6px 10px 10px 10px;padding:14px;box-shadow:0 14px 30px rgba(0,0,0,.45)}
+.fpaper{background:#fbf7ec;color:var(--paper-ink);border-radius:4px;padding:16px 18px;min-height:180px;max-height:58vh;overflow:auto;box-shadow:0 2px 6px rgba(0,0,0,.2);background-image:repeating-linear-gradient(transparent 0 27px,#e3dccb 27px 28px)}
+.fpaper h3{font-size:18px;margin-bottom:6px}
+.fpaper .clue{background:#fff1b8;border-radius:4px;padding:2px 4px}
+.tr{display:flex;flex-direction:column;gap:6px}
+.tr button{text-align:left;background:#fff;border:1px solid #d8ccb0;border-radius:8px;padding:6px 10px;font-size:14px;color:var(--paper-ink)}
+.tr button.flagged{border-color:var(--crime);background:#ffe7e3}
+.tr .who{font-size:11px;font-weight:600;color:#8a5d14;text-transform:uppercase;letter-spacing:.06em}
+.tr .sys{font-size:13px;color:#7a6c55;padding:2px 4px}
+.fclose{margin-top:10px}
+
+/* Law book */
+.lawbook{display:grid;grid-template-columns:1fr 1fr;background:linear-gradient(90deg,#5a2a14,#7a3b1d 50%,#5a2a14);padding:12px;border-radius:12px;box-shadow:0 16px 34px rgba(0,0,0,.5)}
+@media (max-width:700px){.lawbook{grid-template-columns:1fr}}
+.lpage{background:#f8f0dc;color:var(--paper-ink);padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.lpage.left{border-radius:6px 0 0 6px;box-shadow:inset -14px 0 18px -12px rgba(0,0,0,.35)}
+.lpage.right{border-radius:0 6px 6px 0;box-shadow:inset 14px 0 18px -12px rgba(0,0,0,.35)}
+.lpage h2{font-size:22px;color:#4a2510}
+.lawent h3{font-size:16px;color:#4a2510}
+.lawent p{margin:2px 0 6px;font-size:14px}
+.lawent .stamp{font-family:var(--f-mono);font-size:10px;color:#2e6e3a;border:1px solid #2e6e3a;border-radius:4px;padding:0 4px;margin-left:6px}
+.pickbtn{font-size:13px;font-weight:600;background:#4a2510;color:#f8f0dc;border-radius:7px;padding:5px 10px}
+
+/* Verdict card */
+.vcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;display:flex;flex-direction:column;gap:8px;width:min(440px,100%);margin:0 auto}
+.stampbig{font-family:var(--f-display);font-weight:900;font-size:30px;letter-spacing:.05em;padding:2px 14px;border:3px solid;border-radius:8px;align-self:flex-start;transform:rotate(-3deg)}
+.stampbig.ok{color:var(--good)}.stampbig.bad{color:#ff7d70}
+.vcard h2{font-size:22px}
+.vcard p{margin:0;color:#d9d2c3}
+.vtotal{font-family:var(--f-mono);font-size:20px;font-weight:700}
+
+/* Envelope note */
+.envnote{position:relative;background:#e2c88f;border-radius:10px;padding:22px;color:#2a2116;box-shadow:0 16px 34px rgba(0,0,0,.5)}
+.envnote .slip{background:#fbf7ee;transform:rotate(-3deg);padding:14px 18px;font-family:var(--f-hand);font-size:30px;line-height:1.15;box-shadow:0 4px 10px rgba(0,0,0,.25);max-width:460px}
+.envnote .cash{position:absolute;right:18px;bottom:14px;font-family:var(--f-display);font-weight:900;font-size:28px;background:#6f9b5a;color:#10220b;padding:4px 12px;border-radius:4px;transform:rotate(6deg)}
+
+/* Newspaper */
+.paper{background:var(--paper);color:var(--paper-ink);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.paper .mast{font-family:var(--f-display);font-weight:900;font-size:34px;text-align:center;border-bottom:3px double #6b5a3c;line-height:1.1;padding-bottom:4px}
+.paper .dateline{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b5a3c}
+.paper .lead{font-family:var(--f-display);font-weight:700;font-size:22px;line-height:1.2}
+.paper ul{margin:0;padding-left:18px;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.stat{background:#e3d6b8;border-radius:8px;padding:8px 10px}
+.stat .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:#6b5a3c}
+.stat .v{font-family:var(--f-mono);font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.promo{font-family:var(--f-display);font-weight:700;border-left:3px solid #8a5d14;padding-left:10px}
+
+/* Mini-games */
+.mg{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.mg canvas{width:100%;height:auto;display:block;border-radius:10px;background:#1b1410;touch-action:manipulation;cursor:crosshair}
+.slots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.slots span{width:34px;height:40px;border-bottom:3px solid var(--brass);font-family:var(--f-mono);font-size:24px;display:flex;align-items:center;justify-content:center;font-weight:700}
+.slots span.on{color:var(--good)}
+.lawfill{background:var(--paper);color:var(--paper-ink);border-radius:10px;padding:14px;font-size:17px;line-height:2}
+.blank{display:inline-block;min-width:110px;border-bottom:2px solid #6b5a3c;text-align:center;font-weight:600;padding:0 6px;line-height:1.4}
+.blank.ok{color:#2e6e3a;border-color:#2e6e3a}
+.shake{animation:shake2 .3s}
+@keyframes shake2{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.enacted{font-family:var(--f-display);font-weight:900;color:#2e6e3a;font-size:26px;border:3px solid #2e6e3a;padding:0 10px;border-radius:6px;transform:rotate(-4deg);display:inline-block}
+.file .ev,.file h3{color:var(--paper-ink)}
+
+/* ---------- Welcome ---------- */
+.welcome{position:fixed;inset:0;z-index:60;overflow:auto;background:radial-gradient(ellipse at 50% -10%,#3a2a1c 0%,#1b1712 45%,#0b0e13 100%);padding:max(20px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(20px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.welcome .inner{max-width:1040px;margin:0 auto;min-height:100%;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:28px;align-items:center}
+@media (max-width:820px){.welcome .inner{grid-template-columns:minmax(0,1fr)}}
+.crest{width:80px;height:80px;border-radius:50%;border:3px solid var(--brass);display:flex;align-items:center;justify-content:center;font-family:var(--f-display);font-size:34px;color:var(--brass);background:radial-gradient(circle,#2a2117,#17120d)}
+.welcome h1{font-size:clamp(42px,7.2vw,86px);font-weight:900;line-height:.95;color:var(--paper);margin:16px 0 12px;letter-spacing:.02em}
+.welcome .kick{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--brass);margin:16px 0 0}
+.welcome .lede{font-size:17px;color:#d8cfbd;max-width:46ch;margin:0 0 22px}
+.plate-in{display:flex;flex-direction:column;gap:6px;max-width:420px}
+.plate-in label{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.nm{display:flex;align-items:center;background:linear-gradient(#d4a84a,#a87a2a);border-radius:6px;padding:3px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+.nm span{font-family:var(--f-display);font-weight:700;font-size:21px;color:var(--brass-ink);padding:0 4px 0 12px}
+.nm input{flex:1;min-width:0;font-family:var(--f-display);font-weight:700;font-size:21px;color:var(--brass-ink);background:#e9c472;border:0;border-radius:4px;padding:8px 10px}
+.go{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.go .btn.brass{font-size:17px;padding:12px 22px}
+.opts{display:flex;gap:14px;flex-wrap:wrap;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.opts label{display:flex;gap:6px;align-items:center}
+.toggle{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px}
+.toggle[aria-pressed="true"]{border-color:var(--brass);color:var(--brass)}
+.oath{background:rgba(20,27,36,.88);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.oath h2{font-size:22px;color:var(--paper)}
+.oath ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:8px;font-size:14.5px}
+.oath ol b{color:var(--paper)}
+.oath .warn{font-size:13px;color:#ecc0b9;border-left:3px solid var(--crime);padding:6px 10px;background:rgba(185,56,46,.12);border-radius:4px}
+.rotate{position:absolute;inset:0;z-index:40;background:rgba(7,9,12,.92);display:none;flex-direction:column;gap:12px;align-items:center;justify-content:center;text-align:center;padding:24px}
+@media (orientation:portrait) and (max-width:700px){.rotate.show{display:flex}}
+</style>
+
+<div class="game">
+  <div class="court r0" id="court">
+    <div class="wall"></div><div class="lamp"></div>
+    <div class="flag l"></div><div class="flag r"></div>
+    <svg class="clock" id="clock" viewBox="0 0 100 100" aria-label="Case clock">
+      <circle cx="50" cy="50" r="47" fill="#f4ecd8" stroke="#c99a3e" stroke-width="5"/>
+      <path id="clkWedge" fill="rgba(185,56,46,.28)"/>
+      <g id="clkTicks"></g>
+      <line id="clkMin" x1="50" y1="50" x2="50" y2="18" stroke="#2b2217" stroke-width="3.2" stroke-linecap="round"/>
+      <g class="sec" id="clkSec" style="transform-origin:50px 50px"><line x1="50" y1="58" x2="50" y2="10" stroke="#b9382e" stroke-width="1.6" stroke-linecap="round"/></g>
+      <circle cx="50" cy="50" r="3.2" fill="#b9382e"/>
+    </svg>
+    <div class="gallery l" id="galL"></div><div class="gallery r" id="galR"></div>
+    <div class="trim"></div><div class="floor"></div>
+    <div class="fig b" id="figB"></div>
+    <div class="fig w" id="figW" hidden></div>
+    <div class="stand"></div>
+    <div class="fig p" id="figP" hidden></div>
+    <div class="fig d" id="figD" hidden></div>
+    <div class="table l"></div><div class="table r"></div>
+    <div class="tag l shadowtext" id="tagP" hidden></div><div class="tag r shadowtext" id="tagD" hidden></div>
+
+    <div class="hud" id="hud">
+      <span><span class="k">Cases</span><span class="v" id="hCases">0/4</span></span>
+      <span><span class="k">Time</span><span class="v timer" id="hTimer">3:00</span></span>
+      <span><span class="k">Points</span><span class="v" id="hPts">0</span></span>
+      <span class="rep"><span class="k" style="margin-right:0">Reputation</span><span class="bar"><i id="hRep" style="width:60%"></i></span><span class="v" id="hRepN">60</span></span>
+    </div>
+    <button class="menubtn" id="menuBtn" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="#f1ebdd" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+
+    <div class="plate shadowtext" id="plate" hidden><h2 id="plateT"></h2><p id="plateS"></p></div>
+    <div class="bubble" id="bubble" hidden></div>
+    <div class="topcards" id="topcards"></div>
+    <div class="prompt shadowtext" id="prompt"></div>
+
+    <div class="desk" id="desk">
+      <button class="deskitem gavel" id="gavel" aria-label="Gavel">
+        <svg viewBox="0 0 220 130" aria-hidden="true">
+          <defs>
+            <linearGradient id="gWoodV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#9a5a2e"/><stop offset=".45" stop-color="#5e2d12"/><stop offset="1" stop-color="#2f1607"/></linearGradient>
+            <linearGradient id="gWoodH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#3a1b09"/><stop offset=".35" stop-color="#8e5129"/><stop offset=".55" stop-color="#a8653a"/><stop offset="1" stop-color="#3a1b09"/></linearGradient>
+            <linearGradient id="gBrass" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#7a5616"/><stop offset=".45" stop-color="#f3d27c"/><stop offset="1" stop-color="#7a5616"/></linearGradient>
+            <linearGradient id="gBlock" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2f1607"/><stop offset=".5" stop-color="#7a4020"/><stop offset="1" stop-color="#2f1607"/></linearGradient>
+          </defs>
+          <ellipse cx="150" cy="121" rx="62" ry="6" fill="rgba(0,0,0,.35)"/>
+          <path d="M102 102 L102 114 A48 8 0 0 0 198 114 L198 102 Z" fill="url(#gBlock)"/>
+          <ellipse cx="150" cy="102" rx="48" ry="8" fill="#8b4b24"/>
+          <ellipse cx="150" cy="102" rx="38" ry="5.5" fill="none" stroke="#a8653a" stroke-width="1"/>
+          <g id="gArm">
+            <path d="M20 66 Q70 62 128 60 L128 71 Q70 72 20 78 Z" fill="url(#gWoodV)"/>
+            <ellipse cx="16" cy="72" rx="8" ry="9" fill="#6b3416"/>
+            <ellipse cx="14" cy="70" rx="3" ry="4" fill="#a8653a" opacity=".6"/>
+            <rect x="122" y="22" width="38" height="76" rx="11" fill="url(#gWoodH)"/>
+            <rect x="122" y="34" width="38" height="7" fill="url(#gBrass)"/>
+            <rect x="122" y="79" width="38" height="7" fill="url(#gBrass)"/>
+            <ellipse cx="141" cy="25" rx="17" ry="4.5" fill="#b8754a"/>
+            <ellipse cx="141" cy="96" rx="17" ry="4" fill="#3a1b09"/>
+          </g>
+        </svg>
+      </button>
+      <button class="deskitem book" id="bookBtn" aria-label="Law book">
+        <svg viewBox="0 0 120 86" aria-hidden="true">
+          <defs><linearGradient id="bkL" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8a4421"/><stop offset="1" stop-color="#4a210e"/></linearGradient></defs>
+          <rect x="10" y="16" width="100" height="62" rx="5" fill="#3b1c0c"/>
+          <rect x="13" y="11" width="96" height="60" rx="3" fill="#f1e7cf"/>
+          <path d="M14 18h94M14 24h94M14 30h94" stroke="#d8cbab" stroke-width="1"/>
+          <rect x="8" y="6" width="100" height="62" rx="5" fill="url(#bkL)"/>
+          <rect x="8" y="6" width="12" height="62" rx="4" fill="#3e1b0a"/>
+          <rect x="25" y="12" width="77" height="50" rx="3" fill="none" stroke="#d4a84a" stroke-width="1.6"/>
+          <g stroke="#e3bb5c" stroke-width="2" fill="none" stroke-linecap="round"><path d="M63 22v28M50 28h26M50 28l-6 12M50 28l6 12M76 28l-6 12M76 28l6 12M56 52h14"/><path d="M43 40a7 3 0 0 0 14 0M69 40a7 3 0 0 0 14 0"/></g>
+        </svg>
+        <span class="shadowtext">Law book</span>
+      </button>
+      <button class="deskitem file" id="fileBtn" aria-label="Case file">
+        <svg viewBox="0 0 120 86" aria-hidden="true">
+          <path d="M8 14 Q8 8 14 8 H44 L52 16 H106 Q112 16 112 22 V76 Q112 80 108 80 H12 Q8 80 8 76 Z" fill="#b8913f"/>
+          <rect x="20" y="10" width="78" height="60" rx="2" fill="#fbf7ec" transform="rotate(-4 59 40)"/>
+          <path d="M28 22h52M28 30h60M28 38h44" stroke="#c9bfa8" stroke-width="2" transform="rotate(-4 59 40)"/>
+          <path d="M6 28 Q6 24 10 24 H110 Q114 24 114 28 L110 78 Q110 82 106 82 H14 Q10 82 10 78 Z" fill="#e1bf72"/>
+          <rect x="34" y="44" width="52" height="16" rx="2" fill="#f7ecd0" stroke="#a8843a"/>
+          <text x="60" y="56" text-anchor="middle" font-family="Cinzel, Georgia, serif" font-weight="700" font-size="9" fill="#5a4214">CASE FILE</text>
+        </svg>
+        <span class="shadowtext">Case file</span>
+      </button>
+      <div class="deskactions" id="deskActions"></div>
+    </div>
+    <button class="envfly" id="envFly" hidden aria-label="Envelope">
+      <svg viewBox="0 0 120 80" aria-hidden="true">
+        <rect x="70" y="4" width="40" height="22" rx="2" fill="#6f9b5a" transform="rotate(12 90 15)"/>
+        <rect x="4" y="12" width="112" height="64" rx="4" fill="#e6cf98"/>
+        <path d="M4 16 L60 50 L116 16" fill="#d7b978" stroke="#bf9f5e"/>
+        <circle cx="60" cy="48" r="8" fill="#a12a22"/><circle cx="60" cy="48" r="4.5" fill="none" stroke="#d65a4f" stroke-width="1.2"/>
+      </svg>
+    </button>
+    <div class="coach" id="coach" hidden></div>
+    <div class="pops" id="pops"></div>
+    <div class="rotate" id="rotate"><h2>Turn your phone sideways</h2><p class="note">The courtroom is built for a wide screen.</p><button class="btn" id="rotOk">Play anyway</button></div>
+  </div>
+</div>
+
+<div class="welcome" id="welcome">
+  <div class="inner">
+    <div>
+      <div class="crest" aria-hidden="true">§</div>
+      <p class="kick">A courtroom game · prototype</p>
+      <h1>Order in the Court</h1>
+      <p class="lede">You were sworn in this morning. The courtroom has folding chairs and a flickering light. The cases are messier than the room. Climb from District Court to the Supreme Court, one ruling at a time.</p>
+      <div class="plate-in">
+        <label for="wName">Your nameplate</label>
+        <div class="nm"><span>Judge</span><input id="wName" maxlength="18" autocomplete="off" placeholder="Your name" value=""></div>
+      </div>
+      <div class="go" id="wGo"></div>
+      <div class="opts">
+        <button class="toggle" id="wVoice" aria-pressed="true">Voice: on</button>
+        <label for="wRate">Voice speed <input type="range" id="wRate" min="0.8" max="1.5" step="0.1" value="1"></label>
+        <label><input type="checkbox" id="wAuto"> Auto-advance lines</label>
+        <label><input type="checkbox" id="wSkip"> Skip the orientation day</label>
+      </div>
+      <p class="note" id="wNoVoice" hidden style="margin-top:8px">This browser has no built-in voice, so text-to-speech is off.</p>
+    </div>
+    <div class="oath">
+      <h2>How a case works</h2>
+      <ol>
+        <li><b>Open the case file.</b> Read the evidence. Nobody tells you the charge.</li>
+        <li><b>Bang the gavel.</b> The clock on the wall starts ticking. Hear both sides, or one person and a police report.</li>
+        <li><b>Dig.</b> 3 questions, a witness, a clue mini-game. Tap a speech bubble to flag a lie.</li>
+        <li><b>Rule.</b> Crime or No Crime. For a crime, find the law in the law book and pick a fair sentence.</li>
+      </ol>
+      <p class="warn">Day 1 is a guided orientation. After that, envelopes will land on your desk, and nobody tells you how close the press is.</p>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="ov" hidden><div class="sheet" id="sheet"></div></div>
+
+<script>
+"use strict";
+/* ============================== DATA (edit these to tune the game) ============================== */
+const LAWS = {
+  vandalism:{name:"Vandalism", def:"Damaging someone else's property on purpose.",
+    fill:{text:"A person commits Vandalism when they ___ someone else's property ___.", ans:["damage","on purpose"], dec:["borrow","by accident","admire"]}},
+  theft:{name:"Theft", def:"Taking property that belongs to someone else without permission, meaning to keep it.",
+    fill:{text:"A person commits Theft when they ___ property that belongs to ___ with the intent to ___ it.", ans:["take","another person","permanently keep"], dec:["borrow","the city","briefly show"]}},
+  trespass:{name:"Trespassing", def:"Entering or staying on property without permission, or after being told to stay away.",
+    fill:{text:"A person commits Trespassing when they ___ or stay on property ___.", ans:["enter","without permission"], dec:["leave","with an invitation","photograph"]}},
+  noise:{name:"Disturbing the Peace", def:"Making unreasonably loud noise during quiet hours after being warned.",
+    fill:{text:"A person is Disturbing the Peace when they make ___ noise during ___ after being ___.", ans:["unreasonably loud","quiet hours","warned"], dec:["soft","business hours","thanked"]}},
+  harass:{name:"Harassment", def:"Contacting someone again and again after being told to stop, in a way meant to alarm or upset them.",
+    fill:{text:"A person commits Harassment when they ___ contact someone ___, meaning to alarm them.", ans:["repeatedly","after being told to stop"], dec:["once","with permission","politely"]}},
+  fraud:{name:"Fraud", def:"Lying on purpose to get someone's money or property.",
+    fill:{text:"A person commits Fraud when they ___ on purpose to get someone's ___.", ans:["lie","money or property"], dec:["joke","compliments","apologize"]}}
+};
+const SENT = ["Warning","Fine","Fine + pay for damages","Community service","Probation","Jail"];
+const RANKS = [
+  {name:"District Court",   cls:"r0", time:180, target:2500,  fee:500,  bribe:5000,   cases:4},
+  {name:"Trial Court",      cls:"r1", time:150, target:5500,  fee:800,  bribe:15000,  cases:4},
+  {name:"Court of Appeals", cls:"r2", time:135, target:9000,  fee:1200, bribe:30000,  cases:4},
+  {name:"Federal Court",    cls:"r3", time:120, target:12500, fee:2000, bribe:75000,  cases:4},
+  {name:"Supreme Court",    cls:"r4", time:105, target:Infinity, fee:3000, bribe:150000, cases:4}
+];
+const PTS = {verdict:100, wrongVerdict:-100, law:50, wrongLaw:-25, sentence:50, badSentence:-25, lie:30, falseFlag:-10, per30s:10, streak:25, mistrial:-150,
+  repWrong:-15, repRight:3, repMistrial:-10, witnessCost:15, bribePts:300, bribeExposure:35, stingChance:0.15, nightlyRisk:0.5, refuseRep:10};
+
+/* Each case template returns a full case. c = true means the hidden truth is "Crime". */
+const CASES = [
+c => ({tag:"Keyed Car Case", title:"Taylor v. Brooks", short:"A keyed car in the work parking lot", charge:"vandalism",
+  p:{name:"Jordan Taylor"}, d:{name:"Sam Brooks", look:{top:"#b3322b"}},
+  evidence:[{n:"Photo",t:"A 42-inch scratch along the driver door of Jordan's new car."},{n:"Sam's parking receipt",t:`Exit stamped ${c?"7:42 PM":"7:25 PM"}.`}],
+  pLines:["Somebody keyed my brand-new car in the work lot. Forty-two inches. I measured.","I came out and Sam was walking away from it. Sam's been bitter since I got the promotion.","Sam literally told me, \"Enjoy it while it lasts.\""],
+  dLines:[{t:"I parked next to Jordan. I left at 7:30 and never touched that car.",lie:c},{t:"\"Enjoy it while it lasts\" was about the free pizza in the break room.",lie:false}],
+  questions:[
+    {q:"Can you prove when you left?",to:"d",a:"My parking receipt is in the file. Check it.",lie:false},
+    {q:"Did you actually see the scratch happen?",to:"p",a:"Well... no. I saw Sam near the car. That's enough, right?",lie:false},
+    {q:"What were you wearing that night?",to:"d",a:"This jacket. I wear it every day.",lie:false},
+    {q:"When did you last see the car undamaged?",to:"p",a:c?"At 7:35, when I put my gym bag in the trunk.":"At lunch. I didn't go out to it again until 8.",lie:false}],
+  witness:{name:"Dana Ruiz",role:"Security guard",look:{top:"#25303e"},t:`Around 7:40 I saw someone in a ${c?"red":"blue"} jacket drag something along that car.`,lie:false},
+  shooter:{word:"CAMERA",clue:c?"Camera still, 7:39 PM: a person in a red jacket crouched by Jordan's door, keys in hand.":"Camera still, 7:39 PM: Sam's parking spot is already empty. Someone in a blue hoodie stands by Jordan's car."},
+  truth:{crime:c,law:"vandalism",sent:[1,3]},
+  why:c?{act:"The door was keyed between 7:35 and 7:42, while Sam was still in the lot.",intent:"A grudge plus a lie about leaving time points to on purpose.",law:"Vandalism: damaging someone else's property on purpose.",defense:"None. Sam's own receipt breaks Sam's alibi."}
+       :{act:"The car was keyed, but Sam's receipt shows Sam left at 7:25.",intent:"No evidence Sam did anything, on purpose or not.",law:"No law broken by Sam. A grudge and being nearby are not proof.",defense:"Alibi: the receipt, plus the guard saw a blue jacket, not Sam's red one."}}),
+
+c => ({tag:"Midnight Drum Feud", title:"Okafor v. Reyes", short:"Drum practice through the apartment ceiling", charge:"noise",
+  p:{name:"Femi Okafor",look:{hair:"bald"}}, d:{name:"Jade Reyes"},
+  evidence:[{n:"Building rules",t:"Quiet hours: 10 PM to 7 AM."},{n:"Noise app screenshot",t:c?"94 decibels, 1:14 AM, Tuesday.":"88 decibels, 7:20 PM, Tuesday."}],
+  pLines:["My neighbor plays drums like the building owes her money.","I work early shifts at the hospital. I need sleep, not a rock concert.",c?"I slid three written warnings under her door. Three!":"I've had enough. I want it stopped."],
+  dLines:[{t:"I practice for my band. Music isn't a crime.",lie:false},{t:c?"And I never got any warnings. Not one.":"I always stop by 9:30. I set an alarm for it.",lie:c}],
+  questions:[
+    {q:"What time do you usually practice?",to:"d",a:c?"Evenings. Eightish. Sometimes it runs late, I guess.":"Six to nine-thirty. Then I stop. Every time.",lie:false},
+    {q:"Did you ever talk to her directly?",to:"p",a:c?"Three notes. She taped one back to my door with a rude drawing on it.":"No. I figured the noise app would speak for itself.",lie:false},
+    {q:"Did you ever get notes from Mr. Okafor?",to:"d",a:c?"Okay, maybe one. Or three. I thought they were jokes.":"No. This is the first I'm hearing he was upset.",lie:false},
+    {q:"Why does early-evening noise bother you?",to:"p",a:c?"It isn't early evening, Your Honor. It's one in the morning.":"I go to bed at 6 PM. My shift starts at 3 AM.",lie:false}],
+  witness:{name:"Lou Park",role:"Neighbor",t:c?"I hear drums past midnight most weeks. My cat hides in the bathtub.":"Drums, yes. Late at night, no. She's done by 9:30. You could set a clock by it.",lie:false},
+  shooter:{word:"DOORBELL",clue:c?"Doorbell video, 1:12 AM: Jade carries drumsticks into her unit. Drumming starts at 1:14.":"Doorbell video: Jade leaves for her bartending shift at 9:40 PM every Tuesday."},
+  truth:{crime:c,law:"noise",sent:[0,1]},
+  why:c?{act:"Drumming at 94 decibels at 1:14 AM, inside quiet hours.",intent:"She kept going after three written warnings.",law:"Disturbing the Peace: loud noise in quiet hours after a warning.",defense:"None. Her claim of no warnings is a lie."}
+       :{act:"Drumming happened, but at 7:20 PM, outside quiet hours.",intent:"She stops on a schedule before quiet hours.",law:"No law broken. Annoying is not the same as illegal.",defense:"The noise was during allowed hours, and she was never warned."}}),
+
+c => ({tag:"Wine Dress Drama", title:"Vance v. Dupree", short:"Red wine on a $400 bridesmaid dress", charge:"vandalism",
+  p:{name:"Kayla Vance",look:{hair:"long"}}, d:{name:"Monique Dupree",look:{hair:"bun"}},
+  evidence:[{n:"Receipt",t:"Bella Bridal: 1 sage chiffon dress, $400. Sold, no returns."},{n:"Group chat screenshot",t:c?"Monique, 6:02 PM: \"watch what happens to the maid of honor tonight\" (wine glass emoji)":"Monique, 6:02 PM: \"can't wait to see everyone tonight!!\""}],
+  pLines:["At the rehearsal dinner, Monique poured red wine down my $400 bridesmaid dress.","She's been jealous since the bride picked me as maid of honor instead of her.","I had to wear a cardigan to the ceremony. In June."],
+  dLines:[{t:"It was an accident. Somebody bumped me.",lie:c},{t:"And her dress was a rental, so let's not act like it was couture.",lie:true}],
+  questions:[
+    {q:"Who bumped you?",to:"d",a:c?"I don't know. A man. A tall one. Or a waiter.":"Uncle Ray. He was doing the Cha-Cha Slide.",lie:false},
+    {q:"Did you see her pour it?",to:"p",a:"I felt it. Cold wine down my back. She was right there smiling.",lie:false},
+    {q:"What did your 6:02 PM text mean?",to:"d",a:c?"It was a joke! About the toast. Probably.":"That I was excited. It's my sister's wedding.",lie:false},
+    {q:"Has she apologized?",to:"p",a:c?"No. She laughed and said red is my color.":"She offered to pay for cleaning. I said no. I wanted her in court.",lie:false}],
+  witness:{name:"Theo Grant",role:"Waiter",look:{top:"#1d1d1f"},t:c?"Nobody bumped her. She stood behind the lady and tipped the glass slowly, like pouring syrup.":"A man doing the Cha-Cha Slide slammed right into her elbow. Wine went everywhere.",lie:false},
+  shooter:{word:"VIDEO",clue:c?"Party video: Monique glances around, then tilts her glass over Kayla's shoulder. Nobody is near her.":"Party video: Uncle Ray slides left, straight into Monique's elbow."},
+  truth:{crime:c,law:"vandalism",sent:[1,2]},
+  why:c?{act:"Wine was poured on Kayla's dress, ruining it.",intent:"The 6:02 PM text and the waiter's account show it was on purpose.",law:"Vandalism: damaging someone else's property on purpose.",defense:"\"Someone bumped me\" is contradicted by the waiter and video."}
+       :{act:"Wine spilled on the dress when Monique was bumped.",intent:"An accident. Nobody meant to damage anything.",law:"No crime. Vandalism needs intent. Kayla could ask for cleaning costs in small claims.",defense:"Accident. Note: Monique lied about the rental, but lying about a detail does not make her guilty."}}),
+
+c => ({tag:"Dog Custody Fight", title:"Lin v. Carter", short:"An ex picked up the dog from daycare and kept him", charge:"theft",
+  p:{name:"Brenda Lin",look:{hair:"long"}}, d:{name:"Marcus Carter"},
+  evidence:[{n:"Adoption papers",t:`Happy Tails Rescue. Adopter: ${c?"Brenda Lin":"Marcus Carter"}. Fee paid: $150.`},{n:"Daycare log",t:"Biscuit picked up by Marcus Carter, Friday 5:10 PM."}],
+  pLines:["My ex, Marcus, picked up my dog Biscuit from daycare and never brought him back.","I pay for everything. Food, vet, the little raincoat.","He says Biscuit is his emotional support. He doesn't even know Biscuit's birthday."],
+  dLines:[{t:"Biscuit is my dog. I adopted him before we ever dated.",lie:c},{t:"I just took back what's mine.",lie:false}],
+  questions:[
+    {q:"When did you adopt Biscuit?",to:"d",a:c?"Uh... 2023? Around then. Spring-ish.":"March 2021. We started dating in 2022.",lie:false},
+    {q:"Whose name is on the vet records?",to:"p",a:c?"Mine. Every visit since Biscuit was a puppy.":"Mine on the recent ones. I started taking him after Marcus moved out.",lie:false},
+    {q:"How did you get Biscuit?",to:"d",a:"I'm still on the daycare pickup list. They handed him right over.",lie:false},
+    {q:"Did Marcus ever ask for Biscuit back before?",to:"p",a:c?"Never. Not once in four months.":"He asked twice. I ignored him. I thought he'd give up.",lie:false}],
+  witness:{name:"Pat Osei",role:"Rescue volunteer",t:c?"I processed that adoption. Brenda signed, Brenda paid. Marcus wasn't even there.":"Marcus adopted Biscuit. I remember because he cried in the parking lot.",lie:false},
+  shooter:{word:"RECORDS",clue:c?"Microchip record: registered owner Brenda Lin, since 2020.":"Microchip record: registered owner Marcus Carter, since 2021."},
+  truth:{crime:c,law:"theft",sent:[2,4]},
+  why:c?{act:"Marcus took Biscuit and kept him.",intent:"He lied about adopting him to justify keeping him.",law:"Theft: taking another person's property, meaning to keep it.",defense:"None. Papers, microchip and the volunteer all say Brenda owns Biscuit."}
+       :{act:"Marcus took Biscuit home.",intent:"He took back his own dog.",law:"No crime. You can't steal what legally belongs to you.",defense:"Ownership: adoption papers and microchip are in Marcus's name."}}),
+
+c => ({tag:"Midnight Pool Swim", title:"Whitfield v. Nash", short:"A teenager swimming in the HOA pool after hours", charge:"trespass",
+  p:{name:"Gloria Whitfield",look:{hair:"bun",hairColor:"#9a9a9a"}}, d:{name:"Mason Nash",look:{hair:"curly"}},
+  evidence:[{n:"Pool sign",t:"Residents and guests only. Closed 9 PM to 7 AM."},{n:"Gate report",t:c?"Gate padlock found cut at 11:20 PM.":"Gate opened with key fob #114 at 10:52 PM."}],
+  pLines:["I caught this young man swimming in our pool at 11 PM. It closes at 9.","He was doing cannonballs. In the dark. Like a raccoon.","Residents only. Rules are rules. I have them laminated."],
+  dLines:[{t:"My grandma lives there. She said I could swim anytime.",lie:c},{t:"I came in through the gate like a normal person.",lie:c}],
+  questions:[
+    {q:"How did you get through the gate?",to:"d",a:c?"It was open. Kind of. Mostly open.":"Grandma's fob. Number 114. It beeps.",lie:false},
+    {q:"Is his grandmother a resident?",to:"p",a:c?"She was. She moved to Florida two years ago.":"Yes, unit 114. Lovely woman. Terrible at bingo.",lie:false},
+    {q:"Were you ever told not to come back?",to:"d",a:c?"There was a letter. I didn't read the whole thing.":"No. Never. I help Grandma with groceries every week.",lie:false},
+    {q:"What harm did he cause?",to:"p",a:"He woke up the whole east side. And he used a pool noodle that isn't his.",lie:false}],
+  witness:{name:"Edna Nash",role:"Mason's grandmother",look:{hair:"bun",hairColor:"#cfcfcf"},t:c?"I love Mason, but I sold the condo in 2024. I don't have a fob anymore.":"I gave him my fob and said swim whenever. I didn't know about the 9 PM rule.",lie:false},
+  shooter:{word:"PADLOCK",clue:c?"Hardware store receipt in Mason's car: bolt cutters, bought 9:58 PM.":"Fob log: #114 belongs to Edna Nash, current resident."},
+  truth:{crime:c,law:"trespass",sent:[0,3]},
+  why:c?{act:"Mason entered a residents-only pool through a cut padlock.",intent:"He had a letter banning him and brought bolt cutters.",law:"Trespassing: entering without permission, or after being told to stay away.",defense:"None. His grandmother no longer lives there."}
+       :{act:"Mason swam after hours using a resident's fob.",intent:"He believed he had permission, and he did.",law:"No crime. Breaking an HOA pool-hours rule is an HOA fine, not a crime.",defense:"Permission from a resident."}}),
+
+c => ({tag:"No-Show DJ", title:"Moreno v. Sharpe", short:"A wedding DJ took an $800 deposit and never showed", charge:"fraud",
+  p:{name:"Tiffany Moreno",look:{hair:"long"}}, d:{name:"Rico Sharpe",look:{top:"#3b2b52"}},
+  evidence:[{n:"Contract",t:"DJ services, June 14, 6 to 11 PM. Deposit: $800."},{n:"Bank record",t:c?"Rico's account: three separate $800 deposits for June 14 events.":"Rico's account: one $800 deposit, June 2."}],
+  pLines:["I paid DJ Rico an $800 deposit for my wedding. He never showed up.","We danced to my cousin's phone playlist. It had ads. Ads, Your Honor.","I want my money back, and I want him in jail."],
+  dLines:[{t:"I had a family emergency that night. I'm sorry about the wedding.",lie:c},{t:"I've been a professional DJ for ten years.",lie:false}],
+  questions:[
+    {q:"What was the emergency?",to:"d",a:c?"My aunt. Or grandma? A relative was sick. Somewhere.":"Car crash on the way there. I was in the ER until 2 AM.",lie:false},
+    {q:"Did he offer a refund?",to:"p",a:c?"His number was disconnected the next day.":"He emailed something. I didn't read it. I was busy being furious.",lie:false},
+    {q:"How many events did you book for June 14?",to:"d",a:c?"Just yours. Okay, three. But I was going to rotate.":"One. Hers. I don't double-book.",lie:false},
+    {q:"Why did you pick him?",to:"p",a:"He has 40,000 followers. That's how I knew he was legit.",lie:false}],
+  witness:{name:c?"Ana Cole":"Sam Patel",role:c?"Another bride":"ER nurse",look:c?{hair:"long"}:{top:"#3f7f8a"},t:c?"He took my $800 for June 14 too. He never showed for me either.":"He came in at 7:10 PM after a crash. He kept asking for his phone to call a bride.",lie:false},
+  shooter:{word:"CALENDAR",clue:c?"Rico's calendar: June 14 booked three times, each marked \"collect deposit.\"":"Rico's email, June 15: \"I'm so sorry. Full refund attached.\""},
+  truth:{crime:c,law:"fraud",sent:[2,4]},
+  why:c?{act:"Rico took three deposits for the same night.",intent:"He could never play three weddings at once, so he lied to get the money.",law:"Fraud: lying on purpose to get someone's money.",defense:"\"Family emergency\" is vague and contradicted by the triple booking."}
+       :{act:"Rico missed the wedding after a car crash.",intent:"No plan to cheat. He tried to refund her.",law:"No crime. Breaking a contract is a civil matter: Tiffany gets a refund, not a conviction.",defense:"Emergency, backed by the ER nurse."}}),
+
+c => ({tag:"Missing Rent", title:"Shah v. Ross", short:"$600 in cash rent that never reached the landlord", charge:"theft",
+  p:{name:"Priya Shah",look:{hair:"long"}}, d:{name:"Dylan Ross"},
+  evidence:[{n:"Landlord text",t:"Rent for unit 3B not received for March."},{n:"Found in Dylan's room",t:c?"Store receipt: GameZone, March 2, $598, paid cash.":"Birthday card: \"Happy 24th! Love, Mom\" with a console gift receipt."}],
+  pLines:["I gave my roommate Dylan $600 cash for rent. The landlord says he never got it.","That same weekend Dylan showed up with a brand-new game console.","Now I have a late fee and a roommate with a suspicious number of controllers."],
+  dLines:[{t:"I gave the landlord the cash, like I do every month.",lie:c},{t:"The console was a birthday gift from my mom.",lie:c}],
+  questions:[
+    {q:"How did you deliver the rent?",to:"d",a:c?"In an envelope. In his mailbox? Slot? Some slot.":"Into the office drop box, like always. I took a picture.",lie:false},
+    {q:"Has rent ever gone missing before?",to:"p",a:"Never. But Dylan never had a new console before either.",lie:false},
+    {q:"Where did the console money come from?",to:"d",a:c?"Savings. I save. I'm a saver.":"My mom. Want me to call her? She will talk for an hour.",lie:false},
+    {q:"Did the landlord check the drop box?",to:"p",a:c?"He says the box was empty.":"He said the drop box lock was broken this month.",lie:false}],
+  witness:{name:"Gus Bell",role:"Landlord",look:{hair:"bald"},t:c?"Nothing in the drop box. And Dylan asked me for a rent extension that same morning.":"Found it. The envelope was stuck in the back of the broken drop box. My bad.",lie:false},
+  shooter:{word:"ENVELOPE",clue:c?"ATM log: Dylan deposited $600 cash into his own account on March 1.":"Dylan's phone photo: an envelope marked \"3B MARCH\" going into the drop box, March 1."},
+  truth:{crime:c,law:"theft",sent:[2,4]},
+  why:c?{act:"Dylan kept Priya's $600 and spent it.",intent:"He lied about delivering it and about where the console money came from.",law:"Theft: taking another person's property, meaning to keep it.",defense:"None. The ATM log and the receipt contradict him."}
+       :{act:"The rent went into the drop box and got stuck.",intent:"Dylan did what he was supposed to do.",law:"No crime. A broken box is nobody's crime.",defense:"Proof of delivery: his photo, and the landlord found the envelope."}}),
+
+c => ({tag:"Ex's Texts", title:"Kim v. Hale", short:"An ex who keeps reaching out after being blocked", charge:"harass",
+  p:{name:"Derek Kim"}, d:{name:"Ashley Hale",look:{hair:"long"}},
+  evidence:[{n:"Phone log",t:c?"47 messages from 6 different numbers after Derek blocked Ashley on May 3.":"2 messages from Ashley, May 4 and May 11, both about returning her things."},{n:"Letter",t:"A 4-page handwritten letter Ashley mailed to Derek's mother."}],
+  pLines:["My ex, Ashley, won't leave me alone. I blocked her and she keeps finding ways.","She sent my mom a four-page letter about my emotional unavailability.","I just want peace. And my hoodie back."],
+  dLines:[{t:"I sent him, like, two messages. Tops.",lie:c},{t:"He has my air fryer. I want my air fryer.",lie:false}],
+  questions:[
+    {q:"Did Derek tell you to stop contacting him?",to:"d",a:c?"He said stop. But he said it in a way that meant keep going.":"He blocked me. I respected it, except to ask for my air fryer.",lie:false},
+    {q:"How did she reach you after the block?",to:"p",a:c?"New numbers. Email. A $1 payment request with the note \"why.\"":"Honestly? Two texts. My mom is the one upset about the letter.",lie:false},
+    {q:"Why did you write to his mother?",to:"d",a:"Because she deserves to know. It was respectful. It had a table of contents.",lie:false},
+    {q:"Did she threaten you?",to:"p",a:c?"One text said \"you'll see me everywhere.\" Then she joined my gym.":"No. Just very long paragraphs.",lie:false}],
+  witness:{name:c?"Lana Ortiz":"Grace Kim",role:c?"Gym front desk":"Derek's mother",look:c?{top:"#2c6b6b"}:{hair:"bun",hairColor:"#555"},t:c?"She signed up the day after the breakup and asked what time Derek works out.":"The letter was rude, but it was one letter. And she's right about the hoodie.",lie:false},
+  shooter:{word:"BLOCKED",clue:c?"App store receipt on Ashley's phone: 6 temporary phone numbers, bought May 5.":"Text thread, May 11, Ashley: \"Leave the air fryer on the porch. Then I'm done. Promise.\""},
+  truth:{crime:c,law:"harass",sent:[1,4]},
+  why:c?{act:"47 messages from 6 burner numbers after being blocked, plus showing up at his gym.",intent:"\"You'll see me everywhere\" shows she meant to alarm him.",law:"Harassment: repeated contact after being told to stop, meant to alarm.",defense:"None. \"Two messages\" is a lie."}
+       :{act:"Two texts about returning property, and one letter to his mom.",intent:"Getting her stuff back, not scaring him.",law:"No crime. Rude and messy is not the same as repeated, alarming contact.",defense:"A legitimate reason to make contact, and she stopped."}})
+];
+
+/* Solo cases: one person before the bench. The State brings the charge; the officer's report replaces the plaintiff. */
+const SOLO = [
+c => ({solo:true, tag:"Self-Checkout Steak", title:"State v. Rivera", short:"A $42 steak that rang up as onions", charge:"theft",
+  d:{name:"Gabe Rivera"},
+  evidence:[{n:"Receipt",t:"Self-checkout #4: yellow onions, 2.1 lb, $2.08. Paid."},{n:"Bag at the door",t:"One ribeye steak, $41.99. No onions."}],
+  report:["Store security stopped Mr. Rivera at the exit with a $42 ribeye in his bag.","His receipt shows $2.08 for onions. There were no onions in the bag."],
+  dLines:[{t:"I scanned it! The machine said onions. I don't argue with machines.",lie:c},{t:"Who even steals a steak? I'm a vegetarian. Mostly.",lie:false}],
+  questions:[
+    {q:"Did you look at the screen when you scanned?",to:"d",a:c?"I glanced. It beeped. A beep is a beep.":"No. I was on the phone with my mom. It beeped, I bagged.",lie:false},
+    {q:"Have you used the onion code before?",to:"d",a:c?"Define \"used.\"":"What's an onion code?",lie:false},
+    {q:"Who was the steak for?",to:"d",a:c?"Date night. Big date. Expensive date.":"My roommate's birthday dinner. He sent me a list.",lie:false},
+    {q:"What did you do when you were stopped?",to:"d",a:c?"Said \"my bad\" and walked faster.":"Offered to pay the difference right there. They said too late.",lie:false}],
+  witness:{name:"Kim Doyle",role:"Store security",look:{top:"#25303e"},t:c?"Same register, same onion code, three Fridays in a row. I started a folder.":"Honestly? Register 4 has been reading meat as produce all week. I filed a ticket.",lie:false},
+  shooter:{word:"SCANNER",clue:c?"Camera clip: Rivera types 4166, the onion code, then sets the steak on the scale.":"Store IT ticket, opened Monday: Register 4 reads meat barcodes as produce."},
+  truth:{crime:c,law:"theft",sent:[1,3]},
+  why:c?{act:"Left with a $42 steak after paying $2.08.",intent:"He typed the onion code on purpose, three weeks running.",law:"Theft: taking property without paying, meaning to keep it.",defense:"None. The camera shows him keying in the code."}
+       :{act:"Left with an under-charged steak.",intent:"A broken scanner. He offered to pay the difference.",law:"No crime. Theft needs intent to take what you didn't pay for.",defense:"Honest mistake, backed by the store's own IT ticket."}}),
+
+c => ({solo:true, tag:"Haunted Mall Video", title:"State v. Okoro", short:"A YouTuber filming in a closed mall at 2:40 AM", charge:"trespass",
+  d:{name:"Tyler Okoro",look:{hair:"curly",top:"#5a6b3a"}},
+  evidence:[{n:"Fence sign",t:"No trespassing. Violators will be prosecuted."},{n:"Arrest note",t:"2:40 AM, inside the old food court, filming with a ring light."}],
+  report:["Officers found Mr. Okoro inside the closed Westgate Mall at 2:40 AM.","When asked what he was doing, he said, \"This is content.\""],
+  dLines:[{t:c?"The door was open. An open door is an invitation.":"I had permission. I emailed the owner and he said yes.",lie:c},{t:"I have 80,000 subscribers. They deserve to see the haunted Cinnabon.",lie:false}],
+  questions:[
+    {q:"How did you get inside?",to:"d",a:c?"Through the door. Near the fence. That I climbed.":"The night guard let me in with a key. The owner set it up.",lie:false},
+    {q:"Did anyone give you permission?",to:"d",a:c?"My subscribers did. In the comments.":"Yes. The owner, Mr. Hale. I have the email.",lie:false},
+    {q:"Why film at 2:40 in the morning?",to:"d",a:"Ghosts don't come out at noon, Your Honor.",lie:false},
+    {q:"Have you been warned before?",to:"d",a:c?"Once. At a water park. Different situation. Very wet.":"Never. I always get permission. Lawsuits are expensive.",lie:false}],
+  witness:{name:"Rosa Diaz",role:"Night guard",look:{top:"#25303e",hair:"bun"},t:c?"Nobody told me about filming. I found the fence cut on the east side.":"The owner told me to let him in at midnight. I unlocked the door myself.",lie:false},
+  shooter:{word:"EMAILS",clue:c?"His inbox: one email to the mall owner. No reply.":"Email from the owner: \"Sure, film Saturday night. Rosa will let you in.\""},
+  truth:{crime:c,law:"trespass",sent:[0,3]},
+  why:c?{act:"Entered a closed, fenced property through a cut fence.",intent:"He knew the sign was there and never got an answer from the owner.",law:"Trespassing: entering without permission.",defense:"None. An unanswered email is not permission."}
+       :{act:"Was inside a closed mall at night.",intent:"He believed he had permission, and he did.",law:"No crime. Trespassing needs entry without permission.",defense:"Permission from the owner, confirmed by the guard."}}),
+
+c => ({solo:true, tag:"Karaoke Birthday", title:"State v. Petrov", short:"A 30th birthday party with a karaoke machine", charge:"noise",
+  d:{name:"Nina Petrov",look:{hair:"long"}},
+  evidence:[{n:"City rule",t:"Quiet hours: 10 PM to 7 AM."},{n:"Police log",t:c?"Second call to this address tonight. First at 11:05 PM, warning given. Second at 1:00 AM.":"One call to this address: 9:15 PM."}],
+  report:["Officers answered a noise complaint at Ms. Petrov's house.","They found a karaoke machine, a fog machine, and 40 guests singing a power ballad."],
+  dLines:[{t:"It was my 30th birthday. You only turn 30 once.",lie:false},{t:c?"Nobody warned us. The police only came once.":"We turned it down the second the officer asked.",lie:c}],
+  questions:[
+    {q:"What time did the police arrive?",to:"d",a:c?"Which time? I mean... around 1 AM.":"Around 9:15. The cake hadn't even come out.",lie:false},
+    {q:"Did you turn it down after the first visit?",to:"d",a:c?"We did. Then a really good song came on.":"There was no first visit. That was the visit.",lie:false},
+    {q:"How loud was the machine?",to:"d",a:"It goes to 11. We kept it at a respectful 10.",lie:false},
+    {q:"Who complained?",to:"d",a:"Mr. Gruber. He complains about everything. Even birds.",lie:false}],
+  witness:{name:"Ben Shaw",role:"Police officer",look:{top:"#1f2c44"},t:c?"I warned her at 11:05. At 1 AM I could hear them two blocks away.":"I came once, at 9:15. She turned it down right away. Nice party, honestly.",lie:false},
+  shooter:{word:"WARNING",clue:c?"Body cam, 11:05 PM: Officer Shaw says \"Next time it's a citation.\" Nina says \"Okay, okay!\"":"Body cam, 9:15 PM: Nina turns the speaker down before the officer finishes talking."},
+  truth:{crime:c,law:"noise",sent:[0,1]},
+  why:c?{act:"Loud party at 1 AM, inside quiet hours.",intent:"She kept going after a police warning at 11:05.",law:"Disturbing the Peace: loud noise in quiet hours after a warning.",defense:"None. Her \"only came once\" is a lie."}
+       :{act:"A loud party at 9:15 PM.",intent:"She turned it down as soon as she was asked.",law:"No crime. 9:15 PM is outside quiet hours, and there was no ignored warning.",defense:"Allowed hours and full cooperation."}}),
+
+c => ({solo:true, tag:"Raccoon Mural", title:"State v. Moreau", short:"A 20-foot raccoon painted on a laundromat at 4:30 AM", charge:"vandalism",
+  d:{name:"Jules Moreau",look:{top:"#7a5a2a"}},
+  evidence:[{n:"Photo",t:"A 20-foot mural of a raccoon on the side of Lucky's Laundromat."},{n:"Arrest note",t:"4:30 AM. Paint on hands. 14 spray cans."}],
+  report:["Officers found Mr. Moreau finishing a 20-foot raccoon on the laundromat wall at 4:30 AM.","He told them, \"Art doesn't keep business hours.\""],
+  dLines:[{t:c?"The owner loves it. He said paint whatever I want.":"The owner hired me. Paid me $500.",lie:c},{t:"It's not graffiti. It's a raccoon with feelings.",lie:false}],
+  questions:[
+    {q:"Why paint at 4:30 AM?",to:"d",a:c?"Fewer witnesses. I mean, fewer distractions.":"The laundromat opens at 6. He wanted it done before customers.",lie:false},
+    {q:"Do you have anything in writing?",to:"d",a:c?"We had a vibe. Vibes aren't written down.":"A text, and he paid me through an app. Check my phone.",lie:false},
+    {q:"Have you painted other walls?",to:"d",a:c?"Define \"other walls.\"":"Two murals downtown. Both paid for.",lie:false},
+    {q:"Why a raccoon?",to:"d",a:"The raccoon is all of us, Your Honor. Hungry. Misunderstood.",lie:false}],
+  witness:{name:"Lucky Chen",role:"Laundromat owner",look:{hair:"bald"},t:c?"I never met this person. I want my beige wall back.":"I paid him. I love it. Business is up 20 percent.",lie:false},
+  shooter:{word:"PAYMENT",clue:c?"Owner's camera, 1:10 AM: Jules climbs the fence with spray cans. The owner is asleep upstairs.":"Payment app: Lucky Chen to Jules Moreau, $500, note: \"raccoon mural!!\""},
+  truth:{crime:c,law:"vandalism",sent:[1,3]},
+  why:c?{act:"Painted a 20-foot mural on someone else's wall.",intent:"No permission, and he picked a time with no witnesses.",law:"Vandalism: damaging someone else's property on purpose.",defense:"None. The owner never met him."}
+       :{act:"Painted a mural on the laundromat wall.",intent:"He was hired to.",law:"No crime. Painting a wall the owner paid you to paint isn't damage.",defense:"Permission and payment from the owner."}})
+];
+const ALL = CASES.concat(SOLO);
+
+/* ============================== STATE ============================== */
+const FRESH = () => ({day:1, rank:0, points:0, shown:0, rep:60, exposure:0, sting:false, cash:0, dayCash:0, streak:0, caseNo:0, queue:[], log:[], bribeCase:-1, enemies:0, enacted:new Set(), session:[], tutorial:true, over:false, paused:false, resume:null, coachKey:null});
+const S = Object.assign({name:"Doe", started:false}, FRESH());
+let C = null;
+let tick = null;
+
+/* ============================== HELPERS ============================== */
+const $ = id => document.getElementById(id);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a = a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const wc = s => (String(s).match(/\S+/g)||[]).length;
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const fmt = s => { s = Math.max(0,Math.ceil(s)); return Math.floor(s/60)+":"+String(s%60).padStart(2,"0"); };
+const money = n => "$"+Math.round(n).toLocaleString("en-US");
+const last = name => name.split(" ").slice(-1)[0];
+const rk = () => RANKS[S.rank];
+
+/* ============================== ART ============================== */
+const SKIN = ["#f1c7a5","#dfaa83","#b97d55","#8d5b3b","#603d27"];
+const HAIRC = ["#1f1712","#3b2618","#6e4322","#b98d4e","#2a2a2a"];
+const TOPS = ["#2f4a6b","#55673a","#6b3a5a","#3a3d44","#7a5a2a","#2c6b6b","#7c828a","#4b3b2b"];
+const STYLES = ["short","long","bun","curly","short"];
+function makeLook(over){ return Object.assign({skin:pick(SKIN), hair:pick(STYLES), hairColor:pick(HAIRC), top:pick(TOPS), pants:pick(["#23272e","#3a3f48","#2c2a26","#3d3a52"])}, over||{}); }
+function figSVG(L){
+  const hair = {
+    short:`<path d="M37 46 Q38 18 60 18 Q83 18 83 46 Q78 30 60 30 Q42 30 37 46Z" fill="${L.hairColor}"/>`,
+    long:`<path d="M36 50 Q34 16 60 16 Q86 16 84 50 L88 104 L74 100 L76 52 Q70 32 60 32 Q50 32 44 52 L46 100 L32 104Z" fill="${L.hairColor}"/>`,
+    bun:`<circle cx="60" cy="14" r="11" fill="${L.hairColor}"/><path d="M37 46 Q38 20 60 20 Q82 20 83 46 Q76 32 60 31 Q44 32 37 46Z" fill="${L.hairColor}"/>`,
+    curly:`<g fill="${L.hairColor}"><circle cx="42" cy="32" r="10"/><circle cx="54" cy="22" r="11"/><circle cx="68" cy="22" r="11"/><circle cx="79" cy="33" r="10"/><circle cx="60" cy="27" r="10"/></g>`,
+    bald:`<path d="M38 44 Q40 34 44 32 L44 46Z M82 44 Q80 34 76 32 L76 46Z" fill="${L.hairColor}"/>`
+  }[L.hair] || "";
+  return `<svg viewBox="0 0 120 240" aria-hidden="true">
+  <rect x="40" y="150" width="17" height="86" rx="6" fill="${L.pants}"/><rect x="63" y="150" width="17" height="86" rx="6" fill="${L.pants}"/>
+  <rect x="36" y="228" width="22" height="9" rx="4" fill="#15120f"/><rect x="62" y="228" width="22" height="9" rx="4" fill="#15120f"/>
+  <rect x="52" y="66" width="16" height="14" fill="${L.skin}"/>
+  <path d="M28 84 Q60 68 92 84 L96 160 L24 160Z" fill="${L.top}"/>
+  <path d="M51 76 L60 100 L69 76Z" fill="#ece8df"/>
+  <rect x="13" y="86" width="16" height="66" rx="8" fill="${L.top}"/><rect x="91" y="86" width="16" height="66" rx="8" fill="${L.top}"/>
+  <circle cx="21" cy="155" r="7" fill="${L.skin}"/><circle cx="99" cy="155" r="7" fill="${L.skin}"/>
+  ${L.hair==="long"?hair:""}
+  <ellipse cx="60" cy="48" rx="22" ry="26" fill="${L.skin}"/>
+  ${L.hair!=="long"?hair:`<path d="M38 46 Q40 18 60 18 Q80 18 82 46 Q74 30 60 30 Q46 30 38 46Z" fill="${L.hairColor}"/>`}
+  <circle cx="52" cy="50" r="2.6" fill="#1b1612"/><circle cx="68" cy="50" r="2.6" fill="#1b1612"/>
+  <path d="M53 62 Q60 66 67 62" stroke="#5a3a2a" stroke-width="2" fill="none" stroke-linecap="round"/>
+</svg>`;
+}
+function gallerySVG(){
+  let s = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><rect x="0" y="62" width="100" height="38" fill="rgba(0,0,0,.28)"/>`;
+  for(let row=0;row<3;row++) for(let i=0;i<4;i++){
+    const x = 12+i*25+(row%2)*8, y = 30+row*20;
+    s += `<rect x="${x-9}" y="${y+6}" width="18" height="22" rx="7" fill="${pick(TOPS)}" opacity=".85"/><circle cx="${x}" cy="${y}" r="7" fill="${pick(SKIN)}"/>`;
+  }
+  return s+"</svg>";
+}
+
+/* ============================== TEXT TO SPEECH ============================== */
+const TTS = {
+  on: "speechSynthesis" in window, rate: 1, auto: false,
+  voices(){ try{ return speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang)); }catch(e){ return []; } },
+  speak(text, who, name, onend){
+    if(!this.on || !("speechSynthesis" in window)){ return; }
+    try{
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const vs = this.voices();
+      if(vs.length){ let h=0; for(const ch of (name||who)) h=(h*31+ch.charCodeAt(0))>>>0; u.voice = vs[h%vs.length]; }
+      u.rate = this.rate; u.pitch = {b:0.8,p:1.1,d:1.0,w:1.2}[who]||1;
+      if(onend) u.onend = onend;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  },
+  stop(){ try{ speechSynthesis.cancel(); }catch(e){} }
+};
+
+/* ============================== TOP BAR + CLOCK ============================== */
+function casesInDay(){ return S.tutorial ? 1 : rk().cases; }
+function hud(){
+  const n = casesInDay();
+  $("hCases").textContent = `${Math.min(S.caseNo+(C?1:0), n)}/${n}`;
+  $("hTimer").textContent = fmt(C? C.time : rk().time);
+  $("hTimer").classList.toggle("red", !!(C && C.running && C.time<=30));
+  $("hRep").style.width = S.rep+"%"; $("hRepN").textContent = S.rep;
+  $("hRep").style.background = S.rep<25?"var(--crime)":S.rep<45?"var(--warn)":"var(--good)";
+  $("court").className = "court "+rk().cls;
+  updateClock();
+}
+function animatePoints(){
+  cancelAnimationFrame(animatePoints.r);
+  const el = $("hPts"), from = S.shown, to = S.points, t0 = performance.now(), dur = 520;
+  el.classList.toggle("bump", to>from);
+  const step = now => { const k = Math.min(1,(now-t0)/dur); S.shown = Math.round(from+(to-from)*k); el.textContent = S.shown.toLocaleString("en-US");
+    if(k<1) animatePoints.r = requestAnimationFrame(step); else setTimeout(()=>el.classList.remove("bump"),300); };
+  animatePoints.r = requestAnimationFrame(step);
+}
+function buildClock(){
+  let s = "";
+  for(let i=0;i<60;i++){ const a = i*6*Math.PI/180, big = i%5===0, r1 = big?37:40, r2 = 43;
+    s += `<line x1="${(50+r1*Math.sin(a)).toFixed(2)}" y1="${(50-r1*Math.cos(a)).toFixed(2)}" x2="${(50+r2*Math.sin(a)).toFixed(2)}" y2="${(50-r2*Math.cos(a)).toFixed(2)}" stroke="#2b2217" stroke-width="${big?2.2:.8}"/>`; }
+  $("clkTicks").innerHTML = s;
+}
+function updateClock(){
+  const total = rk().time, t = C ? C.time : total, f = Math.max(0, Math.min(1, t/total));
+  const a = f*2*Math.PI, x = 50+42*Math.sin(a), y = 50-42*Math.cos(a);
+  $("clkWedge").setAttribute("d", f>=0.999 ? "M50 8 A42 42 0 1 1 49.99 8Z" : f<=0 ? "" : `M50 50 L50 8 A42 42 0 ${f>0.5?1:0} 1 ${x.toFixed(2)} ${y.toFixed(2)}Z`);
+  $("clkMin").setAttribute("x2", (50+30*Math.sin(a)).toFixed(2)); $("clkMin").setAttribute("y2", (50-30*Math.cos(a)).toFixed(2));
+  $("clkSec").style.transform = `rotate(${(total-t)*6}deg)`;
+}
+
+/* ============================== STAGE ============================== */
+const POS = {p:"24%", d:"76%", w:"64%", b:"34%", r:"34%"};
+function nameOf(who){ return who==="b"?"Bailiff":who==="r"?"Officer's report":who==="p"?C.d.p.name:who==="d"?C.d.d.name:C.d.witness.name; }
+function setStage(){
+  const d = C.d;
+  $("figP").innerHTML = d.solo ? "" : figSVG(C.lookP); $("figD").innerHTML = figSVG(C.lookD); $("figW").innerHTML = figSVG(C.lookW);
+  $("figD").hidden = false; $("figP").hidden = !!d.solo; $("figW").hidden = true;
+  $("tagP").hidden = $("tagD").hidden = false;
+  $("tagP").innerHTML = d.solo ? `<b>Prosecution</b>The State` : `<b>Plaintiff</b>${esc(d.p.name)}`;
+  $("tagD").innerHTML = `<b>Defendant</b>${esc(d.d.name)}`;
+}
+function clearStage(){ $("bubble").hidden = true; $("plate").hidden = true; $("topcards").innerHTML = ""; $("deskActions").innerHTML = ""; setPrompt(""); }
+function showPlate(t, s){ const p = $("plate"); $("plateT").textContent = t; $("plateS").textContent = s; p.hidden = false; p.classList.remove("in"); void p.offsetWidth; p.classList.add("in"); }
+function setPrompt(html){ $("prompt").innerHTML = html; }
+function say(who, text, opts){
+  opts = opts||{};
+  C.tr.push({who, name:nameOf(who), text, lie:!!opts.lie, flagged:false, flaggable: who!=="b"});
+  C.cur = C.tr.length-1; C.words.dialogue += wc(text);
+  drawBubble();
+  ["figP","figD","figW","figB"].forEach(id=>$(id).classList.remove("talk"));
+  const el = $({p:"figP",d:"figD",w:"figW",b:"figB",r:"figB"}[who]); el.classList.add("talk");
+  clearTimeout(say.t); say.t = setTimeout(()=>el.classList.remove("talk"), Math.min(4000, 300+wc(text)*260));
+  TTS.speak(text, who, nameOf(who), opts.onend);
+  if(S.tutorial && opts.lie) coach("lie");
+}
+function drawBubble(){
+  const x = C.tr[C.cur], b = $("bubble");
+  b.hidden = false; b.style.left = POS[x.who];
+  b.className = "bubble" + (x.flaggable?" can":"") + (x.flagged?" flagged":"");
+  b.innerHTML = `<b>${esc(x.name)}</b>${esc(x.text)}${x.flaggable?`<span class="flaghint">${x.flagged?"Flagged as a lie · tap to undo":"Tap to flag as a lie"}</span>`:""}`;
+}
+$("bubble").onclick = () => {
+  if(!C || C.cur==null) return; const x = C.tr[C.cur];
+  if(!x.flaggable || C.phase==="call" || C.phase==="done") return;
+  x.flagged = !x.flagged; drawBubble();
+  if(S.tutorial && S.coachKey==="lie" && x.flagged) coach(C.phase==="hearing"?"next2":"ask");
+};
+
+/* ============================== GAVEL ============================== */
+let AC = null;
+function bang(){
+  const g = $("gavel"); g.classList.remove("bang"); void g.offsetWidth; g.classList.add("bang");
+  setTimeout(()=>{ const c=$("court"); c.classList.remove("shake"); void c.offsetWidth; c.classList.add("shake");
+    try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); const t = AC.currentTime;
+      const o = AC.createOscillator(), gn = AC.createGain(); o.type = "triangle";
+      o.frequency.setValueAtTime(170,t); o.frequency.exponentialRampToValueAtTime(42,t+.16);
+      gn.gain.setValueAtTime(.0001,t); gn.gain.exponentialRampToValueAtTime(.7,t+.004); gn.gain.exponentialRampToValueAtTime(.0001,t+.24);
+      o.connect(gn).connect(AC.destination); o.start(t); o.stop(t+.3); }catch(e){} }, 170);
+}
+$("gavel").onclick = () => { if(C && C.phase==="call") startCase(); else bang(); };
+
+/* ============================== COACH (orientation day) ============================== */
+const COACH = {
+  file:{el:"fileBtn", t:"Start here. Tap the case file to read the evidence. Reading is free until the gavel bangs."},
+  book:{el:"bookBtn", t:"Now the law book. Nobody tells you the charge. You match what happened to one of these laws yourself."},
+  gavel:{el:"gavel", t:"Tap the gavel to start the case. The clock on the wall starts ticking."},
+  next:{el:"deskActions", t:"Tap Next to hear each side. Everything said is saved in the case file's Transcript tab."},
+  lie:{el:"bubble", t:"Sam says 7:30, but Sam's own receipt in the case file says 7:42. Tap this speech bubble to flag it as a lie."},
+  next2:{el:"deskActions", t:"Flagged. Keep tapping Next to hear the rest."},
+  ask:{el:"topcards", t:"Pick up to 3 questions. The witness costs 15 seconds. The clue shooter can unlock an extra clue."},
+  rule:{el:"deskActions", t:"Decided? Rule CRIME or NO CRIME. For a crime you'll pick the law from the book, then a fair sentence."},
+  sentence:{el:"topcards", t:"Pick a sentence that fits. Jail for a scratched car would be far too harsh."},
+  env:{el:"envFly", t:"Something just landed on your desk. Tap the envelope."}
+};
+let coachTarget = null;
+function coach(k){
+  if(!S.tutorial || !COACH[k]) return hideCoach();
+  S.coachKey = k; const c = $("coach"); c.innerHTML = `<b>Bailiff's tip</b>${esc(COACH[k].t)}`; c.hidden = false;
+  if(coachTarget) coachTarget.classList.remove("glow");
+  coachTarget = $(COACH[k].el); if(coachTarget && coachTarget.id!=="bubble" && coachTarget.id!=="topcards" && coachTarget.id!=="deskActions") coachTarget.classList.add("glow");
+  requestAnimationFrame(placeCoach);
+}
+function placeCoach(){
+  const c = $("coach"); if(c.hidden || !coachTarget) return;
+  const cr = $("court").getBoundingClientRect(), r = coachTarget.getBoundingClientRect(), w = c.offsetWidth, h = c.offsetHeight;
+  const cx = r.left - cr.left + r.width/2, left = Math.max(10, Math.min(cr.width - w - 10, cx - w/2));
+  c.style.left = left+"px"; c.style.setProperty("--ax", Math.max(14, Math.min(w-14, cx-left))+"px");
+  const below = (r.top - cr.top) < cr.height*0.35;
+  c.classList.toggle("up", below); c.classList.toggle("down", !below);
+  c.style.top = below ? (r.bottom - cr.top + 14)+"px" : Math.max(8, r.top - cr.top - h - 14)+"px";
+}
+function hideCoach(){ $("coach").hidden = true; S.coachKey = null; if(coachTarget) coachTarget.classList.remove("glow"); coachTarget = null; }
+addEventListener("resize", placeCoach);
+
+/* ============================== DAY + CASE FLOW ============================== */
+function newDay(){
+  S.caseNo = 0; S.log = []; S.bribeCase = -1; S.dayCash = 0;
+  if(S.tutorial){ S.queue = [0]; }
+  else {
+    const n = rk().cases;
+    let idx = shuffle([...ALL.keys()]);
+    S.queue = idx.slice(0,n);
+    const isSolo = i => i >= CASES.length;
+    if(!S.queue.some(isSolo)) S.queue[1+Math.floor(Math.random()*(n-1))] = CASES.length + Math.floor(Math.random()*SOLO.length);
+    if(S.queue.every(isSolo)) S.queue[0] = Math.floor(Math.random()*CASES.length);
+  }
+  callNext();
+}
+function callNext(){
+  const i = S.queue[S.caseNo];
+  const crime = S.tutorial ? true : Math.random()<0.5;
+  const d = ALL[i](crime);
+  C = {d, crime, i, phase:"call", time:rk().time, running:false, asked:new Set(), witness:false, shooter:false, clue:null, cur:null,
+       tr:[], words:{dialogue:0, docs:0, ui:0}, started:0, queue:[], forced: S.bribeCase===S.caseNo, law:null, lineTok:0,
+       lookP:makeLook(d.p?d.p.look:null), lookD:makeLook(d.d.look), lookW:makeLook(d.witness.look)};
+  clearStage(); setStage(); showPlate(d.title, d.short); renderAll();
+  if(S.tutorial) coach("file");
+}
+function startCase(){
+  bang(); $("plate").hidden = true;
+  C.phase = "hearing"; C.running = true; C.started = performance.now();
+  const d = C.d, open = `All rise. Judge ${S.name} presiding. ${d.title}.`;
+  C.queue = d.solo ? [{who:"b", t:open+" I'll read the officer's report."}, ...d.report.map(t=>({who:"r",t}))]
+                   : [{who:"b", t:open+" Plaintiff, you may begin."}, ...d.pLines.map(t=>({who:"p",t}))];
+  C.queue.push({who:"b", t:`${d.d.name}, how do you plead?`}, {who:"d", t:"Not guilty, Your Honor."}, ...d.dLines.map(x=>({who:"d",t:x.t,lie:x.lie})));
+  clearInterval(tick); tick = setInterval(onTick, 1000);
+  renderAll(); if(S.tutorial) coach("next");
+  nextLine();
+}
+function nextLine(){
+  const L = C.queue.shift();
+  if(!L){ toInvestigate(); return; }
+  const tok = C.lineTok = C.lineTok+1;
+  say(L.who, L.t, {lie:L.lie, onend: () => { if(TTS.auto && C && C.phase==="hearing" && C.lineTok===tok) setTimeout(()=>{ if(C && C.lineTok===tok && C.phase==="hearing") nextLine(); }, 350); }});
+  renderAll();
+}
+function toInvestigate(){ C.phase = "investigate"; renderAll(); if(S.tutorial && S.coachKey!=="lie") coach("ask"); }
+function onTick(){
+  if(!C || !C.running || S.paused) return;
+  if(S.tutorial && C.time<=30){ hud(); return; }
+  C.time -= 1;
+  if(C.time<=0){ C.time = 0; hud(); mistrial(); return; }
+  hud();
+}
+function ask(qi){
+  const q = C.d.questions[qi];
+  if(C.asked.has(qi) || C.asked.size>=3) return;
+  C.asked.add(qi); C.words.ui += wc(q.q);
+  say(q.to, q.a, {lie:q.lie}); renderAll();
+  if(S.tutorial && S.coachKey==="ask") coach("rule");
+}
+function callWitness(){
+  if(C.witness) return;
+  C.witness = true; C.time = Math.max(1, C.time-PTS.witnessCost);
+  pop(`−${PTS.witnessCost} s`, "Witness called", "minus");
+  $("figW").hidden = false; say("w", C.d.witness.t, {lie:C.d.witness.lie}); renderAll();
+  if(S.tutorial && S.coachKey==="ask") coach("rule");
+}
+
+/* ============================== RENDER: TOP CARDS, DESK, PROMPT ============================== */
+function renderAll(){ renderTop(); renderDesk(); renderPrompt(); hud(); }
+function renderTop(){
+  const T = $("topcards");
+  if(!C){ T.innerHTML = ""; return; }
+  const d = C.d;
+  if(C.phase==="investigate"){
+    const left = 3 - C.asked.size;
+    T.innerHTML = d.questions.map((q,i)=>`<button class="card" data-q="${i}" ${C.asked.has(i)||left===0?"disabled":""}><small>Ask ${esc(q.to==="d"?d.d.name:d.p.name)}</small>${esc(q.q)}</button>`).join("")
+      + `<button class="card alt" id="cWit" ${C.witness?"disabled":""}><small>Call witness · −${PTS.witnessCost} s</small>${esc(d.witness.role)}</button>`
+      + `<button class="card alt" id="cShoot" ${C.shooter?"disabled":""}><small>Mini-game</small>Clue shooter</button>`;
+    T.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>ask(+b.dataset.q));
+    $("cWit").onclick = callWitness; $("cShoot").onclick = openShooter;
+  } else if(C.phase==="sentence"){
+    T.innerHTML = SENT.map((s,i)=>`<button class="card" data-s="${i}"><small>Sentence</small>${esc(s)}</button>`).join("");
+    T.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>resolve(true, C.law, +b.dataset.s));
+  } else T.innerHTML = "";
+}
+function renderDesk(){
+  const A = $("deskActions");
+  if(!C){ A.innerHTML = ""; return; }
+  if(C.phase==="hearing"){
+    A.innerHTML = `<button class="dbtn" id="aNext">Next ▸</button><button class="dbtn ghost" id="aSkip">Skip to questions</button>`;
+    $("aNext").onclick = () => { TTS.stop(); nextLine(); };
+    $("aSkip").onclick = () => { TTS.stop(); while(C.queue.length){ const L = C.queue.shift(); C.tr.push({who:L.who, name:nameOf(L.who), text:L.t, lie:!!L.lie, flagged:false, flaggable:L.who!=="b"}); } $("bubble").hidden = true; C.cur = null; toInvestigate(); };
+  } else if(C.phase==="investigate"){
+    A.innerHTML = `<button class="rule crime" id="aCrime" ${C.forced?"disabled":""}>CRIME</button><button class="rule clear" id="aNo">NO CRIME</button>`;
+    $("aCrime").onclick = () => { C.phase = "law"; hideCoach(); openBook(true); };
+    $("aNo").onclick = () => resolve(false, null, null);
+  } else if(C.phase==="sentence"){
+    A.innerHTML = `<button class="dbtn ghost" id="aBack">Back</button>`;
+    $("aBack").onclick = () => { C.phase = "investigate"; renderAll(); };
+  } else A.innerHTML = "";
+}
+function renderPrompt(){
+  if(!C){ setPrompt(""); return; }
+  if(C.phase==="call") setPrompt(`Read the case file, then tap the <strong>gavel</strong> to call ${esc(C.d.title)} to order.`);
+  else if(C.phase==="investigate"){ const left = 3-C.asked.size; setPrompt(`${left} question${left===1?"":"s"} left. Rule when you're ready.${C.forced?` <span class="warn">You took the envelope: you have to rule No Crime.</span>`:""}`); }
+  else if(C.phase==="sentence") setPrompt(`${esc(LAWS[C.law].name)}. Now pick a fair sentence.`);
+  else setPrompt("");
+}
+
+/* ============================== CASE FILE + LAW BOOK ============================== */
+let onSheetClose = null;
+function sheet(html, cls){ const s = $("sheet"); s.dataset.dismiss = "0"; s.className = "sheet " + (cls||"plain"); s.innerHTML = html; $("ov").hidden = false; const f = s.querySelector("button"); if(f) f.focus({preventScroll:true}); }
+function closeSheet(){ $("ov").hidden = true; $("sheet").innerHTML = ""; const f = onSheetClose; onSheetClose = null; if(f) f(); }
+$("ov").addEventListener("click", e => { if(e.target.id==="ov" && $("sheet").dataset.dismiss==="1") closeSheet(); });
+
+function openFile(){
+  if(!C) return;
+  const d = C.d, L = "ABCD";
+  const tabs = d.evidence.map((e,i)=>({k:`Exhibit ${L[i]}`, h:e.n, t:e.t}));
+  if(C.clue) tabs.push({k:"Clue", h:"From the clue shooter", t:C.clue, clue:true});
+  tabs.push({k:"Transcript", tr:true});
+  let cur = 0;
+  const draw = () => {
+    const T = tabs[cur];
+    let body;
+    if(T.tr){
+      body = `<h3>Transcript</h3><p class="note" style="color:#7a6c55;margin-bottom:8px">Tap any statement to flag it as a lie.</p><div class="tr">${C.tr.length? C.tr.map((x,i)=> x.flaggable
+        ? `<button data-tr="${i}" class="${x.flagged?"flagged":""}" aria-pressed="${x.flagged}"><span class="who">${esc(x.name)}${x.flagged?" · flagged as a lie":""}</span><br>${esc(x.text)}</button>`
+        : `<div class="sys">${esc(x.name)}: ${esc(x.text)}</div>`).join("") : `<p class="sys">Nothing has been said yet. Bang the gavel to start.</p>`}</div>`;
+    } else body = `<h3>${esc(T.h)}</h3><p${T.clue?' class="clue"':""}>${esc(T.t)}</p>`;
+    $("sheet").innerHTML = `<div class="folder"><div class="ftabs">${tabs.map((t,i)=>`<button data-t="${i}" aria-selected="${i===cur}">${esc(t.k)}</button>`).join("")}</div>
+      <div class="fbody"><div class="fpaper"><p class="lbl" style="color:#8a5d14">${esc(d.title)}</p>${body}</div></div></div>
+      <div class="row fclose"><button class="btn brass" id="fClose">Close the file</button></div>`;
+    $("sheet").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ cur=+b.dataset.t; draw(); });
+    $("sheet").querySelectorAll("[data-tr]").forEach(b=>b.onclick=()=>{ const x=C.tr[+b.dataset.tr]; if(C.phase==="done") return; x.flagged=!x.flagged; if(C.cur===+b.dataset.tr) drawBubble(); draw(); });
+    $("fClose").onclick = closeSheet;
+  };
+  if(!C.fileSeen){ C.fileSeen = true; C.words.docs += d.evidence.reduce((a,e)=>a+wc(e.n+" "+e.t),0); }
+  sheet("", "folder-sheet"); $("sheet").dataset.dismiss = "1"; draw();
+  onSheetClose = () => { if(S.tutorial && S.coachKey==="file") coach("book"); };
+}
+function openBook(pickMode){
+  const keys = Object.keys(LAWS), half = Math.ceil(keys.length/2);
+  const ent = k => `<div class="lawent"><h3>${esc(LAWS[k].name)}${S.enacted.has(k)?`<span class="stamp">ENACTED</span>`:""}</h3><p>${esc(LAWS[k].def)}</p>${pickMode?`<button class="pickbtn" data-pick="${k}">This law was broken</button>`:""}</div>`;
+  sheet(`<div class="lawbook"><div class="lpage left"><h2>The Law Book</h2>${pickMode?`<p class="note" style="color:#6b5a3c">Which law did ${esc(C.d.d.name)} break?</p>`:`<p class="note" style="color:#6b5a3c">Simplified for the game.</p>`}${keys.slice(0,half).map(ent).join("")}</div>
+    <div class="lpage right">${keys.slice(half).map(ent).join("")}</div></div>
+    <div class="row"><button class="btn ${pickMode?"":"brass"}" id="bkClose">${pickMode?"Back to questioning":"Close the book"}</button></div>`, "book-sheet");
+  $("sheet").dataset.dismiss = pickMode ? "0" : "1";
+  $("bkClose").onclick = () => { if(pickMode){ C.phase = "investigate"; renderAll(); if(S.tutorial) coach("rule"); } closeSheet(); };
+  $("sheet").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{ C.law = b.dataset.pick; C.phase = "sentence"; closeSheet(); renderAll(); if(S.tutorial) coach("sentence"); });
+  onSheetClose = () => { if(!pickMode && S.tutorial && S.coachKey==="book") coach("gavel"); };
+}
+$("fileBtn").onclick = openFile;
+$("bookBtn").onclick = () => openBook(false);
+
+/* ============================== SCORING (points pop in live) ============================== */
+function pop(big, small, cls){
+  const p = document.createElement("div"); p.className = "pop shadowtext "+(cls||"plus");
+  p.innerHTML = `${esc(big)}${small?`<small>${esc(small)}</small>`:""}`;
+  $("pops").appendChild(p); setTimeout(()=>p.remove(), 1800);
+}
+function bigMoney(amt, line){
+  const m = document.createElement("div"); m.className = "bigmoney";
+  m.innerHTML = `<b>+${money(amt)}</b><span class="shadowtext">${esc(line)}</span>`;
+  $("pops").appendChild(m); setTimeout(()=>m.remove(), 2700);
+}
+function resolve(saidCrime, law, sent){
+  C.running = false; clearInterval(tick); TTS.stop(); C.phase = "done"; hideCoach(); bang();
+  const d = C.d, T = d.truth, rows = [];
+  const right = saidCrime === T.crime;
+  rows.push(right?["Correct verdict", PTS.verdict]:["Wrong verdict", PTS.wrongVerdict]);
+  if(right && T.crime){
+    rows.push(law===T.law?["Right law", PTS.law]:["Wrong law", PTS.wrongLaw]);
+    const dist = sent<T.sent[0]? T.sent[0]-sent : sent>T.sent[1]? sent-T.sent[1] : 0;
+    if(dist===0) rows.push(["Fair sentence", PTS.sentence]); else if(dist>1) rows.push(["Sentence far off", PTS.badSentence]);
+  } else if(right) rows.push(["No law broken", PTS.law], ["No sentence needed", PTS.sentence]);
+  const good = C.tr.filter(x=>x.flagged&&x.lie).length, bad = C.tr.filter(x=>x.flagged&&!x.lie).length;
+  if(good) rows.push([good>1?`${good} lies caught`:"Lie caught", good*PTS.lie]);
+  if(bad) rows.push([bad>1?`${bad} false flags`:"False flag", bad*PTS.falseFlag]);
+  if(right){ const tb = Math.floor(C.time/30)*PTS.per30s; if(tb) rows.push(["Time bonus", tb]); }
+  S.streak = right? S.streak+1 : 0;
+  if(right && S.streak>=3) rows.push([`${S.streak} in a row`, PTS.streak]);
+  const rep = right? PTS.repRight : PTS.repWrong, fee = right? rk().fee : 0;
+  S.rep = Math.max(0, Math.min(100, S.rep+rep));
+  const total = rows.reduce((a,r)=>a+r[1],0), dl = last(d.d.name);
+  const head = right ? (T.crime? `${d.tag}: ${dl} Held Responsible` : `${d.tag}: ${dl} Cleared, Judge Sees Through It`)
+                     : (T.crime? `${d.tag}: ${dl} Walks Free. Neighbors Furious.` : `${d.tag}: Innocent ${dl} Punished. Family Plans Appeal.`);
+  record({right, pts:total, rep, head, fee});
+  clearStage();
+  const gap = 560;
+  rows.forEach((r,i)=>setTimeout(()=>{ S.points = Math.max(0, S.points+r[1]); pop(`${r[1]>=0?"+":"−"}${Math.abs(r[1])}`, r[0], r[1]>=0?"plus":"minus"); animatePoints(); }, 300+i*gap));
+  const tEnd = 300 + rows.length*gap;
+  setTimeout(()=>{ if(fee){ S.cash += fee; S.dayCash += fee; pop(`+${money(fee)}`, "case fee", "cash"); } pop(`${rep>=0?"+":"−"}${Math.abs(rep)} reputation`, "", rep>=0?"plus":"minus"); hud(); }, tEnd);
+  setTimeout(()=>verdictCard(right, T, d.why, total, fee), tEnd + 900);
+}
+function verdictCard(right, T, W, total, fee){
+  sheet(`<div class="vcard"><span class="stampbig ${right?"ok":"bad"}">${right?"RIGHT CALL":"WRONG CALL"}</span>
+    <h2>${T.crime?"Crime: "+esc(LAWS[T.law].name):"No crime"}</h2>
+    <p>${esc(right? W.law : (T.crime? W.intent+" "+W.law : W.law+" "+W.defense))}</p>
+    <div class="vtotal ${total>=0?"plus":"minus"}" style="color:${total>=0?"var(--good)":"#ff8a7e"}">${total>=0?"+":"−"}${Math.abs(total)} points${fee?` · +${money(fee)}`:""}</div>
+    ${C.forced?`<p class="note" style="color:#ffb0a6">You ruled the way the envelope asked.</p>`:""}
+    <div class="row"><button class="btn brass" id="sNext">${S.tutorial?"Finish orientation":"Next case"}</button></div></div>`, "vsheet");
+  $("sNext").onclick = afterCase;
+}
+function mistrial(){
+  C.running = false; clearInterval(tick); TTS.stop(); C.phase = "done"; hideCoach();
+  S.points = Math.max(0, S.points+PTS.mistrial); S.rep = Math.max(0, S.rep+PTS.repMistrial); S.streak = 0;
+  record({right:false, pts:PTS.mistrial, rep:PTS.repMistrial, head:`${C.d.tag}: Judge Runs Out the Clock. Mistrial.`, fee:0, mistrial:true});
+  clearStage(); pop(`−${Math.abs(PTS.mistrial)}`, "Mistrial", "minus"); animatePoints(); hud();
+  setTimeout(()=>{ sheet(`<div class="vcard"><span class="stampbig bad">MISTRIAL</span><h2>Time ran out</h2>
+    <p>The truth: ${C.d.truth.crime?"Crime, "+esc(LAWS[C.d.truth.law].name):"No crime"}.</p>
+    <div class="vtotal" style="color:#ff8a7e">−${Math.abs(PTS.mistrial)} points · Reputation ${PTS.repMistrial}</div>
+    <div class="row"><button class="btn brass" id="sNext">Next case</button></div></div>`, "vsheet"); $("sNext").onclick = afterCase; }, 1200);
+}
+function record(r){ const rec = {title:C.d.title, tag:C.d.tag, crime:C.d.truth.crime, forced:C.forced, secs:(performance.now()-C.started)/1000, ...r}; S.log.push(rec); S.session.push(rec); }
+function afterCase(){
+  closeSheet(); S.caseNo++;
+  if(S.rep<=0) return gameOver("Reputation hit zero. The bar association has removed you from the bench.");
+  C = null; clearStage(); $("figW").hidden = true; hud();
+  if(S.tutorial) return practiceEnvelope();
+  if(S.caseNo>=rk().cases) return endOfDay();
+  if(S.caseNo===2) return scandal();
+  if(S.caseNo===3) return recess();
+  callNext();
+}
+
+/* ============================== ENVELOPE ============================== */
+function flyEnvelope(onOpen){
+  const e = $("envFly"); e.hidden = false; e.classList.remove("land"); void e.offsetWidth; e.classList.add("land");
+  setPrompt("Something just slid onto your desk.");
+  e.onclick = () => { e.hidden = true; e.classList.remove("land"); hideCoach(); setPrompt(""); onOpen(); };
+  if(S.tutorial) setTimeout(()=>coach("env"), 1150);
+}
+function scandal(){
+  const nxt = ALL[S.queue[S.caseNo]](true), amt = rk().bribe, cases = Math.round(amt/rk().fee);
+  flyEnvelope(()=>{
+    sheet(`<div class="envnote"><div class="slip">Rule NOT GUILTY for ${esc(nxt.d.name)} in your next case and there's ${money(amt)} in it for you.</div><span class="cash">${money(amt)}</span></div>
+      <p class="note" style="color:var(--text)">A normal case pays you ${money(rk().fee)}. This is ${cases} cases' worth. If you take it, your next case is locked to No Crime, even if they did it. Nobody tells you if someone is watching.</p>
+      <div class="row"><button class="btn brass" id="bAcc">Take the money</button><button class="btn" id="bRef">Refuse and report it</button></div>`, "plain");
+    $("bAcc").onclick = ()=>{ S.cash += amt; S.dayCash += amt; S.exposure += PTS.bribeExposure; if(Math.random()<PTS.stingChance) S.sting = true;
+      S.bribeCase = S.caseNo; S.log.push({scandal:"accepted"}); closeSheet();
+      bigMoney(amt, `That's ${cases} cases' worth of pay`); setTimeout(()=>{ S.points += PTS.bribePts; pop(`+${PTS.bribePts}`, "points", "plus"); animatePoints(); }, 900);
+      setTimeout(callNext, 2700); };
+    $("bRef").onclick = ()=>{ S.rep = Math.min(100, S.rep+PTS.refuseRep); S.enemies++; S.log.push({scandal:"reported"}); closeSheet();
+      pop(`+${PTS.refuseRep} reputation`, "reported to the bar", "plus"); hud(); setTimeout(callNext, 1300); };
+  });
+}
+function practiceEnvelope(){
+  flyEnvelope(()=>{
+    sheet(`<div class="envnote"><div class="slip">Starting tomorrow, envelopes like this will land on your desk. Take the cash and you rule the way they say.</div><span class="cash">${money(rk().bribe)}</span></div>
+      <p class="note" style="color:var(--text)">A normal case pays ${money(rk().fee)}. An envelope pays about ${Math.round(rk().bribe/rk().fee)} times that. Refusing means reporting it, which raises your reputation and makes an enemy. Taking it is a secret risk: there's no meter, and the press could find out any night.</p>
+      <div class="row"><button class="btn brass" id="bGot">Got it</button></div>`, "plain");
+    $("bGot").onclick = ()=>{ closeSheet(); endOfDay(); };
+  });
+}
+
+/* ============================== RECESS: COMPLETE THE LAW ============================== */
+function recess(){
+  const keys = shuffle(Object.keys(LAWS)); const k = keys.find(x=>!S.enacted.has(x)) || keys[0];
+  const F = LAWS[k].fill;
+  let filled = [], mistakes = 0, time = 40, done = false;
+  const parts = F.text.split("___");
+  const bank = shuffle(F.ans.concat(F.dec));
+  sheet(`<div class="mg" style="display:flex;flex-direction:column;gap:12px"><p class="lbl">Recess · Complete the Law</p><h2>${esc(LAWS[k].name)}</h2>
+    <p class="note" style="margin:0">Tap words in order to fill the blanks. Wrong words cost 3 seconds. <span class="val" id="rT">0:40</span></p>
+    <div class="lawfill" id="rText"></div><div class="row" id="rBank"></div><div id="rEnd"></div></div>`, "bare");
+  const draw = () => {
+    $("rText").innerHTML = parts.map((p,i)=> esc(p) + (i<parts.length-1? `<span class="blank ${filled[i]?"ok":""}" id="bl${i}">${filled[i]?esc(filled[i]):"&nbsp;"}</span>`:"")).join("");
+    $("rBank").innerHTML = bank.map((w,i)=>`<button class="btn" data-w="${i}" ${filled.includes(w)?"disabled":""}>${esc(w)}</button>`).join("");
+    $("rBank").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{
+      if(done) return; const w = bank[+b.dataset.w], need = F.ans[filled.length];
+      if(w===need){ filled.push(w); if(filled.length===F.ans.length) finish(true); else draw(); }
+      else { mistakes++; time-=3; const bl=$("bl"+filled.length); if(bl){ bl.classList.remove("shake"); void bl.offsetWidth; bl.classList.add("shake"); } }
+    });
+  };
+  const finish = (ok) => {
+    done = true; clearInterval(rt); draw();
+    const pts = ok ? F.ans.length*20 + (mistakes===0?50:0) : filled.length*20;
+    S.points += pts; if(ok) S.enacted.add(k); animatePoints(); hud();
+    $("rEnd").innerHTML = `${ok?`<span class="enacted">ENACTED</span>`:`<p>Time's up.</p>`}<p>+${pts} points${ok&&!mistakes?" (perfect round)":""}. ${ok?"Added to your Law Book.":""}</p><div class="row"><button class="btn brass" id="rGo">Back to court</button></div>`;
+    $("rGo").onclick = ()=>{ closeSheet(); callNext(); };
+  };
+  draw();
+  const rt = setInterval(()=>{ if(done) return; time--; const e=$("rT"); if(e) e.textContent = fmt(time); if(time<=0) finish(false); },1000);
+}
+
+/* ============================== CLUE SHOOTER ============================== */
+function openShooter(){
+  if(C.shooter) return;
+  C.shooter = true; renderTop();
+  const word = C.d.shooter.word, W = 640, H = 360;
+  const abc = "ABCDEFGHIJKLMNOPRSTUVWY".split("").filter(ch=>!word.includes(ch));
+  const chars = word.split("").concat(shuffle(abc).slice(0,6));
+  const lanes = [70,145,220];
+  const laneV = lanes.map((_,l)=>(l%2?-1:1)*(70+Math.random()*50));
+  const perLane = Math.ceil(chars.length/3), gap = (W+60)/perLane;
+  const letters = shuffle(chars).map((ch,i)=>{ const lane=i%3, slot=Math.floor(i/3); return {ch, x:slot*gap+lane*gap/3, y:lanes[lane], vx:laneV[lane], r:24, alive:true, flash:0}; });
+  let need = 0, t = 25, last = performance.now(), shots = [], aim = -Math.PI/2, done = false, raf = 0, missFlash = 0;
+  sheet(`<div class="mg"><p class="lbl">Clue shooter · case clock <span class="val" id="mgClock">${fmt(C.time)}</span> · <span class="val" id="mgT">0:25</span> left</p>
+    <p class="note" style="margin:0 0 8px">Shoot the letters in order to spell the clue word. Wrong letters cost 2 seconds.</p>
+    <div class="slots" id="slots">${word.split("").map(()=>"<span></span>").join("")}</div>
+    <canvas id="cv" width="${W}" height="${H}" aria-label="Letter shooting gallery"></canvas>
+    <div class="row" style="margin-top:10px"><button class="btn ghost" id="mgQuit">Give up</button></div></div>`, "bare");
+  const cv = $("cv"), ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio||1);
+  cv.width = W*dpr; cv.height = H*dpr; ctx.scale(dpr,dpr);
+  const slots = () => { $("slots").innerHTML = word.split("").map((ch,i)=>`<span class="${i<need?"on":""}">${i<need?ch:""}</span>`).join(""); };
+  const end = (ok) => {
+    if(done || !document.body.contains(cv)) return; done = true; cancelAnimationFrame(raf);
+    if(ok){ C.clue = C.d.shooter.clue; C.words.docs += wc(C.clue); }
+    C.words.ui += wc(word);
+    const box = document.createElement("div");
+    box.innerHTML = ok ? `<div class="file" style="margin-top:10px"><div class="ev clue"><b>Clue unlocked: ${esc(word)}</b>${esc(C.d.shooter.clue)}</div></div>` : `<p class="note">No clue this time.</p>`;
+    box.innerHTML += `<div class="row" style="margin-top:10px"><button class="btn brass" id="mgBack">Back to court</button></div>`;
+    $("sheet").appendChild(box); $("mgQuit").disabled = true;
+    $("mgBack").onclick = ()=>{ closeSheet(); if(C.clue) pop("New clue", "added to the case file", "cash"); };
+  };
+  cv.addEventListener("pointerdown", ev => {
+    if(done) return;
+    const r = cv.getBoundingClientRect(), x = (ev.clientX-r.left)*W/r.width, y = (ev.clientY-r.top)*H/r.height;
+    aim = Math.atan2(y-(H-14), x-W/2); shots.push({x, y, life:0.15});
+    const hit = letters.find(L=>L.alive && Math.hypot(L.x-x, L.y-y) < L.r+6);
+    if(!hit) return;
+    if(hit.ch===word[need]){ hit.alive=false; need++; slots(); if(need===word.length) end(true); }
+    else { t -= 2; hit.flash = 0.3; missFlash = 0.25; }
+  });
+  $("mgQuit").onclick = ()=>end(false);
+  const frame = now => {
+    if(!document.body.contains(cv)){ done = true; return; }
+    const dt = Math.min(0.05,(now-last)/1000); last = now;
+    if(!done){ t -= dt; if(t<=0){ t=0; end(false); } }
+    const te = $("mgT"); if(te) te.textContent = fmt(t); const ce=$("mgClock"); if(ce) ce.textContent = fmt(C.time);
+    ctx.fillStyle = missFlash>0?"#3a1512":"#1d1612"; ctx.fillRect(0,0,W,H); missFlash -= dt;
+    ctx.fillStyle="#2a2019"; lanes.forEach(y=>ctx.fillRect(0,y+30,W,6));
+    for(const L of letters){
+      if(!L.alive) continue;
+      L.x += L.vx*dt; if(L.x<-30) L.x=W+30; if(L.x>W+30) L.x=-30; L.flash -= dt;
+      ctx.beginPath(); ctx.arc(L.x,L.y,L.r,0,7); ctx.fillStyle = L.flash>0?"#e2685c":"#efe4cc"; ctx.fill();
+      ctx.lineWidth=4; ctx.strokeStyle="#b9382e"; ctx.stroke();
+      ctx.fillStyle="#2b2217"; ctx.font="600 24px 'IBM Plex Mono', monospace"; ctx.textAlign="center"; ctx.textBaseline="middle"; ctx.fillText(L.ch,L.x,L.y+1);
+    }
+    shots = shots.filter(s=>(s.life-=dt)>0);
+    ctx.strokeStyle="#cf9f45"; ctx.lineWidth=3; shots.forEach(s=>{ ctx.beginPath(); ctx.moveTo(W/2,H-14); ctx.lineTo(s.x,s.y); ctx.stroke(); });
+    ctx.save(); ctx.translate(W/2,H-14); ctx.rotate(aim+Math.PI/2); ctx.fillStyle="#7d4828"; ctx.fillRect(-7,-38,14,38); ctx.fillStyle="#5a3220"; ctx.fillRect(-18,-50,36,16); ctx.restore();
+    ctx.fillStyle="#cf9f45"; ctx.beginPath(); ctx.arc(W/2,H-6,16,Math.PI,0); ctx.fill();
+    if(!done) raf = requestAnimationFrame(frame);
+  };
+  slots(); raf = requestAnimationFrame(frame);
+}
+
+/* ============================== END OF DAY ============================== */
+function endOfDay(){
+  clearStage(); hideCoach();
+  const cases = S.log.filter(x=>x.title), right = cases.filter(x=>x.right).length, dayPts = cases.reduce((a,x)=>a+x.pts,0);
+  const wasTutorial = S.tutorial;
+  if(!wasTutorial){
+    if(S.sting) return gameOver("The envelope was a sting. The person who handed it to you was a Daily Gavel reporter with a hidden camera.");
+    if(S.exposure>=100) return gameOver("Three envelopes was one too many. The Daily Gavel has bank records, photos, and a source inside your courtroom.");
+    if(S.exposure>0 && Math.random()*100 < S.exposure*PTS.nightlyRisk) return gameOver("A clerk saw the envelope and called the Daily Gavel. The story ran this morning.");
+  }
+  const sc = S.log.find(x=>x.scandal);
+  const worst = cases.find(x=>!x.right && !x.crime && !x.mistrial) || cases.find(x=>x.forced) || cases.find(x=>!x.right);
+  const lead = wasTutorial ? `New Judge ${S.name} Sworn In, Closes First Case` : worst ? worst.head : `Perfect Day on the Bench: ${right} for ${right}`;
+  let promo = "";
+  if(!wasTutorial){
+    if(S.points >= rk().target && S.rank < RANKS.length-1){ S.rank++; promo = `Promoted to ${rk().name}. New courtroom, ${fmt(rk().time)} per case, bigger envelopes.`; }
+    else if(S.rep < 25 && S.rank > 0){ S.rank--; promo = `Reputation below 25. Demoted to ${rk().name}.`; }
+  }
+  S.tutorial = false; hud();
+  sheet(`<div class="paper">
+    <div class="dateline"><span>Day ${S.day}${wasTutorial?" · Orientation":""}</span><span>Judge ${esc(S.name)}</span><span>${esc(rk().name)}</span></div>
+    <div class="mast">The Daily Gavel</div>
+    <div class="lead">${esc(lead)}</div>
+    <ul>${cases.map(x=>`<li>${esc(x.head)}</li>`).join("")}
+      ${sc?`<li>${sc.scandal==="accepted"?"Sources say an envelope changed hands at the courthouse. Officials won't comment.":"Judge reports bribe attempt. Someone powerful is not happy."}</li>`:""}
+      ${S.exposure>=70?`<li>Daily Gavel investigation into courthouse cash enters its second week. "We're close," says the editor.</li>`:S.exposure>0?`<li>A reporter was seen in the courthouse hallway asking which judges drive new cars.</li>`:""}
+      ${wasTutorial?`<li>Tomorrow: ${RANKS[0].cases} cases, a real clock, and the first envelope.</li>`:""}</ul>
+    ${promo?`<div class="promo">${esc(promo)}</div>`:""}
+    <div class="stats">
+      <div class="stat"><div class="k">Accuracy</div><div class="v">${right}/${cases.length}</div></div>
+      <div class="stat"><div class="k">Points today</div><div class="v">${dayPts>=0?"+":""}${dayPts}</div></div>
+      <div class="stat"><div class="k">Earned today</div><div class="v">${money(S.dayCash)}</div></div>
+      <div class="stat"><div class="k">Savings</div><div class="v">${money(S.cash)}</div></div>
+    </div>
+  </div>
+  <div class="row"><button class="btn brass" id="dNext">Start day ${S.day+1}</button><button class="btn" id="dMenu">Back to the start menu</button></div>`, "paperwrap");
+  const next = ()=>{ S.day++; newDay(); };
+  $("dNext").onclick = ()=>{ closeSheet(); next(); };
+  $("dMenu").onclick = ()=>{ closeSheet(); S.resume = next; showWelcome(); };
+}
+function gameOver(why){
+  clearInterval(tick); C = null; S.over = true; clearStage(); hud();
+  sheet(`<div class="paper"><div class="mast">The Daily Gavel</div><div class="lead">Judge ${esc(S.name)} Removed From the Bench</div>
+    <p style="margin:0">${esc(why)}</p>
+    <div class="stats"><div class="stat"><div class="k">Days served</div><div class="v">${S.day}</div></div>
+    <div class="stat"><div class="k">Cases</div><div class="v">${S.session.filter(x=>x.title).length}</div></div>
+    <div class="stat"><div class="k">Points</div><div class="v">${S.points}</div></div>
+    <div class="stat"><div class="k">Savings</div><div class="v">${money(S.cash)}</div></div></div></div>
+    <div class="row"><button class="btn brass" id="goAgain">Start a new career</button><button class="btn" id="goMenu">Back to the start menu</button></div>`, "paperwrap");
+  $("goAgain").onclick = ()=>{ closeSheet(); beginNew(true); };
+  $("goMenu").onclick = ()=>{ closeSheet(); showWelcome(); };
+}
+
+/* ============================== WELCOME + MENU ============================== */
+function showWelcome(){
+  TTS.stop(); S.paused = true;
+  const W = $("welcome"); W.hidden = false; W.scrollTop = 0;
+  $("wName").value = S.name==="Doe" ? "" : S.name;
+  $("wNoVoice").hidden = "speechSynthesis" in window;
+  const canResume = S.started && !S.over && S.resume;
+  $("wGo").innerHTML = canResume
+    ? `<button class="btn brass" id="wCont">Continue: Day ${S.day}${C?", case in progress":""}</button><button class="btn" id="wNew">Start a new career</button>`
+    : `<button class="btn brass" id="wNew">Take the oath and begin</button>`;
+  if(canResume) $("wCont").onclick = () => { $("welcome").hidden = true; S.paused = false; const r = S.resume; S.resume = null; r(); };
+  $("wNew").onclick = () => beginNew(false);
+  syncVoiceBtn();
+}
+function beginNew(sameName){
+  if(!sameName){ const v = $("wName").value.trim().replace(/\s+/g," "); S.name = v ? v.slice(0,18) : "Doe"; }
+  clearInterval(tick); C = null;
+  Object.assign(S, FRESH()); S.started = true; S.tutorial = !$("wSkip").checked;
+  $("hPts").textContent = "0"; $("welcome").hidden = true; hideCoach(); $("envFly").hidden = true; $("ov").hidden = true;
+  hud(); newDay();
+}
+$("wName").addEventListener("keydown", e => { if(e.key==="Enter"){ const c = $("wCont"); if(c) c.click(); else $("wNew").click(); } });
+$("wVoice").onclick = () => { TTS.on = !TTS.on; if(!TTS.on) TTS.stop(); syncVoiceBtn(); };
+$("wRate").oninput = e => TTS.rate = +e.target.value;
+$("wAuto").onchange = e => TTS.auto = e.target.checked;
+function syncVoiceBtn(){ ["wVoice","mVoice"].forEach(id=>{ const b=$(id); if(!b) return; b.setAttribute("aria-pressed", TTS.on); b.textContent = "Voice: "+(TTS.on?"on":"off"); }); }
+$("menuBtn").onclick = () => {
+  S.paused = true;
+  sheet(`<h2>Paused</h2><p class="note">The clock is stopped while this menu is open.</p>
+    <div class="row"><button class="toggle" id="mVoice" aria-pressed="${TTS.on}">Voice: ${TTS.on?"on":"off"}</button>
+    <label class="note"><input type="checkbox" id="mAuto" ${TTS.auto?"checked":""}> Auto-advance lines</label></div>
+    <div class="row"><button class="btn brass" id="mResume">Resume</button><button class="btn" id="mMenu">Back to the start menu</button></div>`, "plain");
+  $("mVoice").onclick = () => { TTS.on = !TTS.on; if(!TTS.on) TTS.stop(); syncVoiceBtn(); };
+  $("mAuto").onchange = e => { TTS.auto = e.target.checked; $("wAuto").checked = TTS.auto; };
+  $("mResume").onclick = () => { closeSheet(); S.paused = false; };
+  $("mMenu").onclick = () => { closeSheet(); S.resume = () => {}; showWelcome(); };
+};
+$("rotOk").onclick = () => $("rotate").classList.remove("show");
+
+/* ============================== BOOT ============================== */
+buildClock();
+$("figB").innerHTML = figSVG({skin:"#b97d55",hair:"short",hairColor:"#1f1712",top:"#1f2c44",pants:"#1a2233"});
+$("galL").innerHTML = gallerySVG(); $("galR").innerHTML = gallerySVG();
+$("rotate").classList.add("show");
+hud(); showWelcome();
+</script>
+
+</body></html>
