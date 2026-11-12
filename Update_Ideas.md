@@ -42,4 +42,18 @@ DAILY GAVEL PAPER (END OF DAY)
 - To upgrade your position you have to have a certain number of points and you can use those points to apply for a higher position and your points are deducted but your position is higher. 
 - Suggestion on POV Type like if they can zoom in or zoom out. 
 
-- Skill tree and short cutscene that shows players going at it
+11/12
+- Skill tree, unlocks skills/trades as you progress
+- short cutscene that shows players going at it (example from ping pong game, ace attorney when he says objection)
+- grabbing things from different games kids play and see how it would be fun for kids
+- objections, plea deals
+- minus points for not catching lies
+- end of a day, have a review/grade at the end showing how you did and all your points, etc
+- background story
+- tutorial
+- mass effect for aliens aspect (way later in the game)
+- a little snippet/scene before the case starts showing the crime/no crime that was committed
+- Persona 5, start the game as the player in a huge case and the player is playing that case then somehow, something happens that messes you up and you start back at level 1 and as you go through the game you play it normally but you also have that orginal case in the back of your head or as a large mission.. each case can have clues that leads to the big story/case
+- GDD
+- character needs to be entertaining enough 
+  
