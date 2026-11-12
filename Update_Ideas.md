@@ -42,4 +42,4 @@ DAILY GAVEL PAPER (END OF DAY)
 - To upgrade your position you have to have a certain number of points and you can use those points to apply for a higher position and your points are deducted but your position is higher. 
 - Suggestion on POV Type like if they can zoom in or zoom out. 
 
-
+- Skill tree and short cutscene that shows players going at it
