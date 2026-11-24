@@ -55,5 +55,16 @@ DAILY GAVEL PAPER (END OF DAY)
 - a little snippet/scene before the case starts showing the crime/no crime that was committed
 - Persona 5, start the game as the player in a huge case and the player is playing that case then somehow, something happens that messes you up and you start back at level 1 and as you go through the game you play it normally but you also have that orginal case in the back of your head or as a large mission.. each case can have clues that leads to the big story/case
 - GDD
-- character needs to be entertaining enough 
+- character needs to be entertaining enough
+
+
+
+11/19/26
+- Still when recieving the envelopo you cant go against it. Change that
+- Add checkpoints in the game/ Save game feature. 
+- Fade in the logo/name of the game, then have a click to start button to start the gameplay and an option for solo gameplay or multiplayer
+- Have a seperate screen for typing in the name and customize character at the begining. Basic player customization.
+- For the background story First thing is show their character in jail (only spent a night in jail) saying that they were framed. Shows a scene where the character receives and envelop but doesn't accept it. Then a scene in the courtroom where we are the judge and we rule not guilty. Then a scene where we are in the courtroom, the case happening and they ruled us as guilty of taking bribes (frames us even though we did not take the bribe). Then you can proceed to show the character looking vengeful and saying they will find out who framed them as he is walking out of the courtroom in cuffs. Then a newspaper shows up showing getting arrested at his house and then a newspaper shows up on the screen telling everyone we are guilty of bribery and we lose everything.
+- for later: when marlowe's case reopens, we are going to be a part of the case since we were framed. we plan to have marlowe be a drug lord and his enemy drug lord is the one who framed us for taking a bribery because we ruled him not guilty. we can have someone who is a rat in marlowe's group be a clue, we want to come across clues outside the courthouse, a scene of a clue can be whoever set you up talking about you but they are a dark silhouette and you can not tell who it is
+- when we go to the apartment: pixel noir, or low poly wood cabin
   
